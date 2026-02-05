@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli - Selim Kitap Kırtasiye</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style (Reusing some styles) -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Admin Specific Overrides */
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #fff;
+            padding: 20px;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        .admin-tab-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-tab-btn:hover {
+            background: #f0f4ff;
+            color: var(--primary-color);
+        }
+
+        .admin-tab-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .admin-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            margin-bottom: 25px;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            color: #888;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        td img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .cat-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9f9f9;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .sub-cat-item {
+            margin-left: 20px;
+            border-left: 2px solid #ddd;
+            padding-left: 10px;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 400px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="login-screen">
+        <div class="login-box">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Admin Girişi</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="username" class="form-input" placeholder="Kullanıcı Adı" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" class="form-input" placeholder="Şifre" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-layout hidden">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>SelimKitap</h2>
+            <nav>
+                <button class="admin-tab-btn active" onclick="switchTab('products')"><i class="fa-solid fa-box"></i>
+                    Ürünler</button>
+                <button class="admin-tab-btn" onclick="switchTab('categories')"><i class="fa-solid fa-list"></i>
+                    Kategoriler</button>
+                <button class="admin-tab-btn" onclick="switchTab('announcements')"><i class="fa-solid fa-bullhorn"></i>
+                    Duyurular</button>
+                <div style="flex-grow: 1;"></div>
+                <button class="admin-tab-btn" id="logoutBtn" style="color: #ff6b6b;"><i
+                        class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- PRODUCTS TAB -->
+            <div id="productsTab">
+                <h2 class="panel-title">Ürün Yönetimi</h2>
+
+                <div class="admin-grid">
+                    <!-- Add Product -->
+                    <div class="admin-card">
+                        <h3>Yeni Ürün Ekle</h3>
+                        <form id="productForm">
+                            <div class="form-group">
+                                <label>Ürün Adı</label>
+                                <input type="text" id="pName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fiyat (TL)</label>
+                                <input type="number" id="pPrice" class="form-input" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="pCategory" class="form-input" required>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Resim URL</label>
+                                <input type="url" id="pImage" class="form-input" placeholder="https://..." required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
+                        </form>
+                    </div>
+
+                    <!-- List Products -->
+                    <div class="admin-card">
+                        <h3>Mevcut Ürünler</h3>
+                        <div style="margin-bottom: 10px; font-weight: bold;" id="totalProductsCount">0 Ürün</div>
+                        <div style="max-height: 500px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th width="50">Resim</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Kategori</th>
+                                        <th>Fiyat</th>
+                                        <th width="50">İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORIES TAB -->
+            <div id="categoriesTab" class="hidden">
+                <h2 class="panel-title">Kategori Yönetimi</h2>
+                <div class="admin-grid">
+                    <!-- Add Category -->
+                    <div class="admin-card">
+                        <h3>Yeni Kategori Ekle</h3>
+                        <form id="categoryForm">
+                            <div class="form-group">
+                                <label>Kategori Adı</label>
+                                <input type="text" id="catName" class="form-input" placeholder="Örn: Kalemler" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Ana Kategori (Opsiyonel)</label>
+                                <select id="parentCategorySelect" class="form-input">
+                                    <option value="">Yok (Ana Kategori)</option>
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <small style="color: #666;">Bir ana kategori seçerseniz, bu kategori onun altına
+                                    eklenir.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
+                        </form>
+                    </div>
+
+                    <!-- List Categories -->
+                    <div class="admin-card">
+                        <h3>Mevcut Kategoriler</h3>
+                        <div style="margin-bottom: 10px; font-weight: bold;" id="totalCategoriesCount">0 Kategori</div>
+                        <div class="category-list" id="categoryListContainer">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANNOUNCEMENTS TAB -->
+            <div id="announcementsTab" class="hidden">
+                <h2 class="panel-title">Duyuru Yönetimi</h2>
+                <div class="admin-grid">
+                    <!-- Add Announcement -->
+                    <div class="admin-card">
+                        <h3>Duyuru Yayınla</h3>
+                        <form id="announcementForm">
+                            <div class="form-group">
+                                <label>Başlık</label>
+                                <input type="text" id="annTitle" class="form-input" placeholder="Duyuru Başlığı"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label>İçerik</label>
+                                <textarea id="annContent" class="form-input" rows="4" placeholder="Duyuru içeriği..."
+                                    required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Yayınla</button>
+                        </form>
+                    </div>
+
+                    <!-- List Announcements -->
+                    <div class="admin-card">
+                        <h3>Yayındaki Duyurular</h3>
+                        <div class="category-list" id="announcementListContainer">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

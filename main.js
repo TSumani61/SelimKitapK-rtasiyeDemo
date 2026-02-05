@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('productGrid');
     const filterBtns = document.querySelectorAll('.filter-btn');
-    // Select all elements that should trigger a filter (Nav links, Category cards)
     const extraFilterTriggers = document.querySelectorAll('.filter-trigger');
 
     // Default Mock Data
@@ -13,12 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 5, name: 'Mat Siyah Kurşun Kalem Seti', price: 120, category: 'Kalem', image: 'https://images.unsplash.com/photo-1595064506822-628d488e364c?auto=format&fit=crop&w=800&q=80' }
     ];
 
-    // Initialize LocalStorage if empty
+    // Initialize Data if empty
     if (!localStorage.getItem('products')) {
         localStorage.setItem('products', JSON.stringify(MOCK_DATA));
     }
 
-    let products = JSON.parse(localStorage.getItem('products')) || [];
+    // Ensure Categories are loaded for filtering logic
+    const allCategories = JSON.parse(localStorage.getItem('categories')) || [];
 
     // Initial Render
     renderProducts('all');
@@ -33,12 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Filter Logic for Nav Links & Category Cards
     extraFilterTriggers.forEach(trigger => {
         trigger.addEventListener('click', (e) => {
+            // If it's the logo or valid internal link, allow default behavior unless it's a filter action
+            if (!trigger.dataset.category) return;
+
             e.preventDefault();
             const category = trigger.dataset.category;
             activateFilter(category);
 
-            // Scroll to product grid
-            document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll to product grid if on homepage
+            const gridEl = document.getElementById('productGrid');
+            if (gridEl) {
+                gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                // If on details page, go home
+                window.location.href = `index.html#productGrid`;
+            }
         });
     });
 
@@ -52,14 +61,32 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProducts(category);
     }
 
-    function renderProducts(category) {
+    function renderProducts(categoryName) {
+        if (!grid) return; // Guard clause if grid missing
         grid.innerHTML = '';
 
         let currentProducts = JSON.parse(localStorage.getItem('products')) || [];
 
-        const filtered = category === 'all'
+        const filtered = categoryName === 'all'
             ? currentProducts
-            : currentProducts.filter(p => p.category === category);
+            : currentProducts.filter(p => {
+                // 1. Direct Match (e.g. Product is 'Kalem', Filter is 'Kalem')
+                if (p.category === categoryName) return true;
+
+                // 2. Subcategory Match (e.g. Product is 'Dolma Kalem', Filter is 'Kalem' [Parent])
+                // Find if 'categoryName' is a parent
+                const parentCat = allCategories.find(c => c.name === categoryName);
+                if (parentCat) {
+                    // Find children names
+                    const subCatNames = allCategories
+                        .filter(c => c.parentId === parentCat.id)
+                        .map(c => c.name);
+
+                    // Check if product's category is one of the children
+                    if (subCatNames.includes(p.category)) return true;
+                }
+                return false;
+            });
 
         if (filtered.length === 0) {
             grid.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; font-size: 1.2rem; padding: 2rem;">Bu kategoride henüz ürün bulunmuyor.</p>';
@@ -70,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'product-card';
 
-            // New V2 Card Structure (Clean - No Cart/Heart)
             card.innerHTML = `
                 <div class="product-img-wrapper">
                     <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/600x600/f1f2f6/2d3436?text=Resim+Yok'">
@@ -81,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="product-info">
                     <div class="product-cat">${product.category}</div>
                     <h3 class="product-name">${product.name}</h3>
-                    <!-- Removing Price if sales are not intended? User kept Price in 'Review' but said no sales. I'll keep price for reference but no cart. -->
                     <div class="product-price">${formatCurrency(product.price)}</div>
                 </div>
             `;
