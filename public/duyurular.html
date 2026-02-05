@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyurular - Selim Kitap Kırtasiye</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .announcement-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            min-height: 50vh;
+        }
+
+        .ann-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .ann-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .ann-date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ann-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .ann-content {
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .empty-ann {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            background: #fdfdfd;
+            border-radius: 10px;
+            border: 2px dashed #eee;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-info">
+                <span><i class="fa-solid fa-phone"></i> +90 212 555 55 55</span>
+                <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
+            </div>
+            <div class="top-socials">
+                <span>Bizi Takip Edin:</span>
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+        <div class="container header-content">
+            <a href="index.html" class="logo">Selim<span>Kitap</span></a>
+
+            <nav>
+                <ul class="nav-list">
+                    <li><a href="index.html">Anasayfa</a></li>
+                    <li><a href="index.html#productGrid">Ürünler</a></li>
+                    <li><a href="duyurular.html" class="active">Duyurular</a></li>
+                    <li><a href="#contact">İletişim</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="announcement-container">
+        <h1 style="margin-bottom: 2rem; border-bottom: 2px solid #eee; padding-bottom: 10px;">Duyurular & Haberler</h1>
+
+        <div id="announcementList">
+            <!-- JS will populate this -->
+            <div class="empty-ann">
+                <i class="fa-regular fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>Henüz yayınlanmış bir duyuru bulunmuyor.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-col">
+                    <a href="#" class="logo"
+                        style="margin-bottom: 1rem; display: block; filter: brightness(0) invert(1);">Selim<span>Kitap</span></a>
+                    <p>Müşteri memnuniyeti bizim önceliğimizdir.</p>
+                </div>
+                <div class="footer-col">
+                    <h5>İletişim</h5>
+                    <div class="contact-row">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>bilgi@selimkitapkirtasiye.com</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Selim Kitap Kırtasiye. Tüm hakları saklıdır.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('announcementList');
+            const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+
+            if (announcements.length > 0) {
+                container.innerHTML = '';
+                // Sort by date new to old
+                announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                announcements.forEach(ann => {
+                    const card = document.createElement('div');
+                    card.className = 'ann-card';
+                    card.innerHTML = `
+                        <div class="ann-date"><i class="fa-regular fa-calendar"></i> ${new Date(ann.date).toLocaleDateString('tr-TR')}</div>
+                        <h3 class="ann-title">${ann.title}</h3>
+                        <div class="ann-content">${ann.content}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
