@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selim Kitap Kırtasiye - Premium Kırtasiye Mağazası</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-info">
+                <span><i class="fa-solid fa-phone"></i> +90 212 555 55 55</span>
+                <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
+            </div>
+            <div class="top-socials">
+                <span>Bizi Takip Edin:</span>
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header & Nav -->
+    <header>
+        <div class="container header-content">
+            <a href="/" class="logo">Selim<span>Kitap</span></a>
+
+            <nav>
+                <ul class="nav-list">
+                    <li><a href="#" class="filter-trigger active" data-category="all">Anasayfa</a></li>
+                    <li><a href="#" class="filter-trigger" data-category="all">Ürünler</a></li>
+                    <li><a href="#" class="filter-trigger" data-category="Defter">Defterler</a></li>
+                    <li><a href="#" class="filter-trigger" data-category="Kalem">Kalemler</a></li>
+                    <li><a href="#" class="filter-trigger" data-category="Sanat">Sanat</a></li>
+                    <li><a href="#contact">İletişim</a></li>
+                </ul>
+            </nav>
+
+            <!-- Optional: Right side element like a contact button or social icon -->
+            <div class="header-right" style="display: flex; gap: 1rem;">
+                <a href="#contact" class="btn btn-small" style="padding: 0.5rem 1.2rem; font-size: 0.8rem;">Bize
+                    Ulaşın</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container hero-grid">
+            <div class="hero-text">
+                <h4 data-aos="fade-up">Okula & Ofise Dönüş</h4>
+                <h1>Hayalindeki Kırtasiye <br>Ürünlerini Keşfet</h1>
+                <p>En prestijli markalar, özel tasarım defterler ve profesyonel sanat malzemeleri tek adreste.</p>
+
+                <a href="#productGrid" class="btn btn-outline" style="margin-left: 1rem;">Koleksiyonlar</a>
+            </div>
+            <div class="hero-image">
+                <!-- Using a visually rich placeholder image representing stationery -->
+                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1000&q=80"
+                    alt="Kırtasiye Koleksiyonu">
+                <div class="hero-badges">
+                    <span>%25</span>
+                    <small>İndirim</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <div class="container service-grid">
+            <div class="service-item">
+                <i class="fa-solid fa-truck-fast"></i>
+                <div class="service-text">
+                    <h4>Ücretsiz Kargo</h4>
+                    <p>250 TL üzeri siparişlerde</p>
+                </div>
+            </div>
+            <div class="service-item">
+                <i class="fa-solid fa-headset"></i>
+                <div class="service-text">
+                    <h4>7/24 Destek</h4>
+                    <p>Her zaman yanınızdayız</p>
+                </div>
+            </div>
+            <div class="service-item">
+                <i class="fa-solid fa-wallet"></i>
+                <div class="service-text">
+                    <h4>Güvenli Ödeme</h4>
+                    <p>256-bit SSL Koruması</p>
+                </div>
+            </div>
+            <div class="service-item">
+                <i class="fa-solid fa-rotate-left"></i>
+                <div class="service-text">
+                    <h4>Kolay İade</h4>
+                    <p>14 gün içinde iade imkanı</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Popüler Kategoriler</h2>
+                <p>İhtiyacınız olan her şey, özenle seçilmiş kategorilerde.</p>
+            </div>
+            <div class="category-grid">
+                <div class="category-card filter-trigger" data-category="Defter">
+                    <img src="https://images.unsplash.com/photo-1531346878377-a513bc95f30f?auto=format&fit=crop&w=500&q=80"
+                        alt="Defterler">
+                    <div class="cat-overlay">
+                        <h3>Defterler</h3>
+                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
+                                class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+                <div class="category-card filter-trigger" data-category="Kalem">
+                    <img src="https://images.unsplash.com/photo-1565538420870-da5852136e47?auto=format&fit=crop&w=500&q=80"
+                        alt="Kalemler">
+                    <div class="cat-overlay">
+                        <h3>Kalemler</h3>
+                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
+                                class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+                <div class="category-card filter-trigger" data-category="Çanta">
+                    <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80"
+                        alt="Çantalar">
+                    <div class="cat-overlay">
+                        <h3>Çantalar</h3>
+                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
+                                class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+                <div class="category-card filter-trigger" data-category="Sanat">
+                    <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=500&q=80"
+                        alt="Sanat">
+                    <div class="cat-overlay">
+                        <h3>Sanat & Hobi</h3>
+                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
+                                class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Öne Çıkan Ürünler</h2>
+                <p>En çok tercih edilen, en yeni kırtasiye ürünleri.</p>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="filter-btn active" data-category="all">Tümü</button>
+                <button class="filter-btn" data-category="Defter">Defter</button>
+                <button class="filter-btn" data-category="Kalem">Kalem</button>
+                <button class="filter-btn" data-category="Çanta">Çanta</button>
+                <button class="filter-btn" data-category="Ofis">Ofis</button>
+            </div>
+
+            <div class="product-grid-container" id="productGrid">
+                <!-- Products injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Deal Section -->
+    <section class="deal-section">
+        <div class="deal-overlay"></div>
+        <div class="container">
+            <div class="deal-content">
+                <h4>Günün Fırsatı</h4>
+                <h2>Profesyonel Çizim Seti</h2>
+                <p>%40 İndirim Fırsatını Kaçırmayın!</p>
+                <div class="countdown">
+                    <!-- Visual Only Countdown -->
+                    <div class="time-box"><span>02</span><small>Gün</small></div>
+                    <div class="time-box"><span>14</span><small>Saat</small></div>
+                    <div class="time-box"><span>45</span><small>Dakika</small></div>
+                    <div class="time-box"><span>30</span><small>Saniye</small></div>
+                </div>
+                <a href="#" class="btn btn-secondary">Satın Al - 450 TL</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-col">
+                    <a href="#" class="logo"
+                        style="margin-bottom: 1rem; display: block; filter: brightness(0) invert(1);">Selim<span>Kitap</span></a>
+                    <p>2010 yılından beri en kaliteli kırtasiye ürünlerini sizlerle buluşturuyoruz. Müşteri memnuniyeti
+                        bizim önceliğimizdir.</p>
+                    <div class="footer-socials">
+                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <!-- Quick Links Removed -->
+                <div class="footer-col">
+                    <h5>Kategoriler</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Okul Defterleri</a></li>
+                        <li><a href="#">Dolma Kalemler</a></li>
+                        <li><a href="#">Sırt Çantaları</a></li>
+                        <li><a href="#">Sanat Malzemeleri</a></li>
+                        <li><a href="#">Ofis Gereçleri</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h5>İletişim</h5>
+                    <div class="contact-row">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>Çamlıca Mah., Lise Yolu, No:48, <br>Sürmene, Trabzon <br>
+                            <a href="https://maps.google.com/?q=Çamlıca+Mah.,+Lise+Yolu,+No:48,+Sürmene,+Trabzon"
+                                target="_blank"
+                                style="color: #4facfe; font-size: 0.9rem; text-decoration: underline;">Rota</a></span>
+                    </div>
+                    <div class="contact-row">
+                        <i class="fa-solid fa-phone"></i>
+                        <span><a href="tel:+904627462004" style="color: inherit;">+90 462 746 20 04</a><br>
+                            <small style="opacity: 0.8;">Telefonu göster</small></span>
+                    </div>
+                    <div class="contact-row">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Mesai Saatleri: <br>Açılış 07:00</span>
+                    </div>
+                    <div class="contact-row">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>bilgi@selimkitapkirtasiye.com</span>
+                    </div>
+                    <div style="margin-top: 1rem; height: 120px; border-radius: 8px; overflow: hidden;">
+                        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0"
+                            marginwidth="0"
+                            src="https://maps.google.com/maps?q=%C3%87aml%C4%B1ca+Mah.%2C+Lise+Yolu%2C+No%3A48%2C+S%C3%BCrmene%2C+Trabzon&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed"></iframe>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Selim Kitap Kırtasiye. Tüm hakları saklıdır.
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

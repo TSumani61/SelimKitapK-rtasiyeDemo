@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli - Selim Kitap Kırtasiye</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="admin-body">
+
+    <!-- Login Section (Overlay) -->
+    <div id="loginSection" class="login-overlay">
+        <div class="login-card">
+            <h1 class="logo" style="text-align: center; margin-bottom: 1rem;">Selim<span>Kitap</span></h1>
+            <h2 style="margin-bottom: 2rem; color: var(--dark);">Yönetici Girişi</h2>
+            <form id="loginForm">
+                <div class="form-group" style="text-align: left;">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="username" class="form-control" placeholder="admin">
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Şifre</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminPanel" class="hidden">
+
+        <!-- Admin Header -->
+        <header class="admin-header-nav">
+            <div class="container admin-nav-container">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <a href="/" class="logo" style="font-size: 1.5rem;">Selim<span>Kitap</span></a>
+                    <span style="font-weight: 300; color: var(--text-light); margin-left: 0.5rem;">| Yönetim
+                        Paneli</span>
+                </div>
+
+                <div class="admin-nav-links">
+                    <button class="admin-tab-btn active" onclick="switchTab('products')">
+                        <i class="fa-solid fa-box-open"></i> Ürünler
+                    </button>
+                    <button class="admin-tab-btn" onclick="switchTab('categories')">
+                        <i class="fa-solid fa-list"></i> Kategoriler
+                    </button>
+                    <button class="admin-tab-btn" id="logoutBtn" style="color: var(--primary);">
+                        <i class="fa-solid fa-sign-out-alt"></i> Çıkış
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+
+            <!-- PRODUCT TAB -->
+            <div id="productsTab" class="tab-content">
+                <div class="admin-dashboard-grid">
+                    <!-- Add Product Form -->
+                    <div class="admin-card">
+                        <h3><i class="fa-solid fa-plus-circle"></i> Yeni Ürün Ekle</h3>
+                        <form id="productForm">
+                            <div class="form-group">
+                                <label>Ürün Adı</label>
+                                <input type="text" id="pName" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fiyat (TL)</label>
+                                <input type="number" step="0.01" id="pPrice" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="pCategory" class="form-control">
+                                    <!-- Options will be populated via JS -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Resim URL</label>
+                                <input type="url" id="pImage" class="form-control" placeholder="https://..." required>
+                            </div>
+                            <button type="submit" class="btn" style="width: 100%;">Ürünü Kaydet</button>
+                        </form>
+                    </div>
+
+                    <!-- Product List -->
+                    <div class="admin-card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Mevcut Ürünler</h3>
+                            <span class="badge badge-secondary" id="totalProductsCount">0 Ürün</span>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Resim</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Kategori</th>
+                                        <th>Fiyat</th>
+                                        <th>İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORIES TAB -->
+            <div id="categoriesTab" class="tab-content hidden">
+                <div class="admin-dashboard-grid">
+                    <!-- Add Category Form -->
+                    <div class="admin-card">
+                        <h3><i class="fa-solid fa-folder-plus"></i> Yeni Kategori</h3>
+                        <form id="categoryForm">
+                            <div class="form-group">
+                                <label>Kategori Adı</label>
+                                <input type="text" id="catName" class="form-control" placeholder="Örn: Sanat, Defter"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary" style="width: 100%;">Kategori Ekle</button>
+                        </form>
+                    </div>
+
+                    <!-- Category List -->
+                    <div class="admin-card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Kategoriler</h3>
+                            <span class="badge badge-accent" id="totalCategoriesCount">0 Kategori</span>
+                        </div>
+                        <div id="categoryListContainer">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>
