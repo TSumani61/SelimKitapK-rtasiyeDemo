@@ -6,6 +6,31 @@
 // Initialize DB Reference
 const db = firebase.firestore();
 
+// Crypto Helper
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Init Auth
+async function initAdminCredentials() {
+    try {
+        const doc = await db.collection('settings').doc('admin').get();
+        if (!doc.exists) {
+            console.log("Initializing admin credentials...");
+            const defaultHash = await sha256('GoropogluKS6134');
+            await db.collection('settings').doc('admin').set({
+                username: 'SelimKübra6134',
+                passwordHash: defaultHash
+            });
+        }
+    } catch (e) {
+        console.error("Auth Init Error:", e);
+    }
+}
+
 // ================= GLOBAL HELPERS & LOADERS =================
 
 // --- Tab Logic ---
@@ -14,7 +39,8 @@ window.switchTab = (tabName) => {
         'products': 'ürünler',
         'categories': 'kategoriler',
         'announcements': 'duyurular',
-        'slider': 'slider'
+        'slider': 'slider',
+        'settings': 'ayarlar'
     };
     const text = mapping[tabName];
 
@@ -428,17 +454,44 @@ document.addEventListener('DOMContentLoaded', () => {
         showAdminPanel();
     }
 
-    loginForm.addEventListener('submit', (e) => {
+    // Init Credentials on Load
+    initAdminCredentials();
+
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
+        const btn = loginForm.querySelector('button');
 
-        if (u === 'SelimKübra6134' && p === 'GoropogluKS6134') {
-            localStorage.setItem('adminLoggedIn', 'true');
-            showAdminPanel();
-            loginForm.reset();
-        } else {
-            alert('Hatalı kullanıcı adı veya şifre!');
+        btn.disabled = true;
+        btn.innerText = 'Kontrol ediliyor...';
+
+        try {
+            const doc = await db.collection('settings').doc('admin').get();
+            if (!doc.exists) {
+                await initAdminCredentials();
+                alert('Sistem güncellendi, lütfen tekrar deneyin.');
+                btn.disabled = false;
+                btn.innerText = 'Giriş Yap';
+                return;
+            }
+
+            const data = doc.data();
+            const hash = await sha256(p);
+
+            if (u === data.username && hash === data.passwordHash) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+                loginForm.reset();
+            } else {
+                alert('Hatalı kullanıcı adı veya şifre!');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Giriş yapılamadı: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Giriş Yap';
         }
     });
 
@@ -578,6 +631,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadSliderImages();
             } catch (e) {
                 alert(e.message);
+            }
+        });
+    }
+    // --- Change Password Form ---
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentP = document.getElementById('currentPassword').value;
+            const newP = document.getElementById('newPassword').value;
+            const confirmP = document.getElementById('confirmPassword').value;
+
+            if (newP !== confirmP) {
+                alert('Yeni şifreler uyuşmuyor!');
+                return;
+            }
+
+            try {
+                const doc = await db.collection('settings').doc('admin').get();
+                if (!doc.exists) return;
+
+                const data = doc.data();
+                const currentHash = await sha256(currentP);
+
+                if (currentHash !== data.passwordHash) {
+                    alert('Mevcut şifre yanlış!');
+                    return;
+                }
+
+                const newHash = await sha256(newP);
+                await db.collection('settings').doc('admin').update({
+                    passwordHash: newHash
+                });
+
+                alert('Şifre başarıyla güncellendi!');
+                changePasswordForm.reset();
+            } catch (err) {
+                alert('Hata: ' + err.message);
             }
         });
     }

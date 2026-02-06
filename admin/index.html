@@ -226,6 +226,8 @@
                     Slider</button>
                 <button class="admin-tab-btn" onclick="switchTab('announcements')"><i class="fa-solid fa-bullhorn"></i>
                     Duyurular</button>
+                <button class="admin-tab-btn" onclick="switchTab('settings')"><i class="fa-solid fa-cog"></i>
+                    Ayarlar</button>
                 <div style="flex-grow: 1;"></div>
                 <button class="admin-tab-btn" id="logoutBtn" style="color: #ff6b6b;"><i
                         class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
@@ -409,6 +411,31 @@
                         <div class="category-list" id="sliderListContainer">
                             <!-- Populated by JS -->
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settingsTab" class="hidden">
+                <h2 class="panel-title">Ayarlar</h2>
+                <div class="admin-grid" style="grid-template-columns: 1fr;">
+                    <div class="admin-card" style="max-width: 500px;">
+                        <h3>Şifre Değiştir</h3>
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label>Mevcut Şifre</label>
+                                <input type="password" id="currentPassword" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Şifre</label>
+                                <input type="password" id="newPassword" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Şifre (Tekrar)</label>
+                                <input type="password" id="confirmPassword" class="form-input" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Şifreyi Güncelle</button>
+                        </form>
                     </div>
                 </div>
             </div>
