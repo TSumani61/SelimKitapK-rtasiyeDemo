@@ -53,7 +53,7 @@ window.switchTab = (tabName) => {
     });
 
     // Toggle Content
-    ['productsTab', 'categoriesTab', 'announcementsTab', 'sliderTab'].forEach(id => {
+    ['productsTab', 'categoriesTab', 'announcementsTab', 'sliderTab', 'settingsTab'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
