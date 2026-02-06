@@ -129,7 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
                      <button class="btn btn-small" onclick="toggleShowcase(${p.id})" style="margin-right:5px; background: ${p.isShowcase ? '#ffd700' : '#eee'}; color: ${p.isShowcase ? '#000' : '#999'};" title="Vitrin Durumu">
                         <i class="fa-solid fa-star"></i>
                     </button>
-                    <button class="btn btn-small btn-danger" onclick="deleteProduct(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #ffebee; color: #c62828;">
+                    <button class="btn btn-small" onclick="editProduct(${p.id})" style="margin-right:5px; padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #e3f2fd; color: #1565c0;" title="Düzenle">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn btn-small btn-danger" onclick="deleteProduct(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #ffebee; color: #c62828;" title="Sil">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -143,25 +146,88 @@ document.addEventListener('DOMContentLoaded', () => {
         filterCategorySelect.addEventListener('change', loadProducts);
     }
 
+    // CANCEL EDIT
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const saveProductBtn = document.getElementById('saveProductBtn');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+            productForm.reset();
+            document.getElementById('pId').value = '';
+            saveProductBtn.innerText = 'Ekle';
+            cancelEditBtn.style.display = 'none';
+        });
+    }
+
     productForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const newProduct = {
-            id: Date.now(),
-            name: document.getElementById('pName').value,
-            price: parseFloat(document.getElementById('pPrice').value),
-            category: document.getElementById('pCategory').value,
-            image: document.getElementById('pImage').value,
-            isShowcase: document.getElementById('pShowcase').checked
-        };
 
+        const pIdField = document.getElementById('pId').value;
         const products = JSON.parse(localStorage.getItem('products')) || [];
-        products.push(newProduct);
-        localStorage.setItem('products', JSON.stringify(products));
+
+        if (pIdField) {
+            // EDIT MODE
+            const index = products.findIndex(p => p.id == pIdField);
+            if (index !== -1) {
+                products[index] = {
+                    ...products[index], // keep existings like extra props if any
+                    name: document.getElementById('pName').value,
+                    price: parseFloat(document.getElementById('pPrice').value),
+                    category: document.getElementById('pCategory').value,
+                    image: document.getElementById('pImage').value,
+                    description: document.getElementById('pDesc') ? document.getElementById('pDesc').value : '',
+                    isShowcase: document.getElementById('pShowcase').checked
+                };
+                localStorage.setItem('products', JSON.stringify(products));
+                alert('Ürün güncellendi.');
+
+                // Reset Mode
+                productForm.reset();
+                document.getElementById('pId').value = '';
+                saveProductBtn.innerText = 'Ekle';
+                cancelEditBtn.style.display = 'none';
+            }
+        } else {
+            // ADD MODE
+            const newProduct = {
+                id: Date.now(),
+                name: document.getElementById('pName').value,
+                price: parseFloat(document.getElementById('pPrice').value),
+                category: document.getElementById('pCategory').value,
+                image: document.getElementById('pImage').value,
+                description: document.getElementById('pDesc') ? document.getElementById('pDesc').value : '',
+                isShowcase: document.getElementById('pShowcase').checked
+            };
+            products.push(newProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+            alert('Ürün eklendi!');
+            productForm.reset();
+        }
 
         loadProducts();
-        productForm.reset();
-        alert('Ürün başarıyla eklendi!');
     });
+
+    window.editProduct = (id) => {
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const p = products.find(prod => prod.id == id);
+        if (!p) return;
+
+        // Fill Form
+        document.getElementById('pId').value = p.id;
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pCategory').value = p.category;
+        document.getElementById('pImage').value = p.image;
+        if (document.getElementById('pDesc')) document.getElementById('pDesc').value = p.description || '';
+        document.getElementById('pShowcase').checked = p.isShowcase || false;
+
+        // Change UI
+        saveProductBtn.innerText = 'Güncelle';
+        cancelEditBtn.style.display = 'block';
+
+        // Scroll to form (optional)
+        productForm.scrollIntoView({ behavior: 'smooth' });
+    };
+
 
     window.toggleShowcase = (id) => {
         let products = JSON.parse(localStorage.getItem('products')) || [];

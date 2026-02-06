@@ -140,9 +140,8 @@
                     <p>2010 yılından beri en kaliteli kırtasiye ürünlerini sizlerle buluşturuyoruz. Müşteri memnuniyeti
                         bizim önceliğimizdir.</p>
                     <div class="footer-socials">
-                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
+                                class="fa-brands fa-instagram"></i></a>
                     </div>
                 </div>
                 <!-- Quick Links Removed -->
@@ -190,6 +189,24 @@
             </div>
         </div>
     </footer>
+
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="modal-img-wrapper" style="flex: 1; min-width: 300px;">
+                    <img id="modalImg" src="" alt="" style="width: 100%; border-radius: 8px;">
+                </div>
+                <div class="modal-info" style="flex: 1; min-width: 300px;">
+                    <span id="modalCat" class="badge badge-primary"></span>
+                    <h2 id="modalTitle" style="margin: 10px 0;"></h2>
+                    <h3 id="modalPrice" style="color: var(--primary-color); margin-bottom: 20px;"></h3>
+                    <p id="modalDesc" style="line-height: 1.6; color: #555;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="main.js"></script>
 </body>

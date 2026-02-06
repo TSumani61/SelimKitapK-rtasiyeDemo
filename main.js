@@ -58,6 +58,7 @@ function initApp() {
     renderProducts('all');
     renderSlider();
     renderCarousel();
+    initModalListeners();
 
     // Attach Search Listener Manually
     const btn = document.getElementById('searchBtn');
@@ -245,7 +246,7 @@ function createProductCard(p) {
         <div class="product-img-wrapper">
             <img src="${p.image}" onerror="this.src='https://placehold.co/600x600?text=Yok'">
              <div class="product-actions">
-                <div class="action-btn"><i class="fa-solid fa-eye"></i></div>
+                <div class="action-btn" title="İncele"><i class="fa-solid fa-eye"></i></div>
             </div>
         </div>
         <div class="product-info">
@@ -254,7 +255,44 @@ function createProductCard(p) {
             <div class="product-price">${parseFloat(p.price).toFixed(2)} TL</div>
         </div>
     `;
+    // Add Click listener
+    div.addEventListener('click', () => window.openModal(p.id));
     return div;
+}
+
+/* ================= MODAL LOGIC ================= */
+window.openModal = function (id) {
+    const p = window.GLOBAL_DATA.products.find(x => x.id == id);
+    if (!p) return;
+
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+
+    // Fill Content
+    document.getElementById('modalImg').src = p.image || '';
+    document.getElementById('modalCat').innerText = p.category;
+    document.getElementById('modalTitle').innerText = p.name;
+    document.getElementById('modalPrice').innerText = `${parseFloat(p.price).toFixed(2)} TL`;
+    document.getElementById('modalDesc').innerText = p.description || 'Bu ürün için henüz açıklama girilmemiş.';
+
+    modal.style.display = 'flex';
+}
+
+// Close Modal Logic (Needs to be run on init)
+function initModalListeners() {
+    const modal = document.getElementById('productModal');
+    const closeBtn = document.querySelector('.close-modal');
+
+    if (closeBtn && modal) {
+        closeBtn.onclick = () => modal.style.display = 'none';
+
+        // Close on outside click
+        window.onclick = (e) => {
+            if (e.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    }
 }
 
 

@@ -259,12 +259,22 @@
                                 <label>Resim URL</label>
                                 <input type="url" id="pImage" class="form-input" placeholder="https://..." required>
                             </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea id="pDesc" class="form-input" rows="4"
+                                    placeholder="Ürün özelliklerini giriniz..."></textarea>
+                            </div>
                             <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                                 <input type="checkbox" id="pShowcase" style="width: auto;">
                                 <label for="pShowcase" style="margin:0; cursor:pointer;">Vitrinde Göster (Haftanın
                                     Ürünü)</label>
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
+                            <!-- Hidden ID input for Edit Mode -->
+                            <input type="hidden" id="pId">
+                            <button type="submit" id="saveProductBtn" class="btn btn-primary"
+                                style="width: 100%;">Ekle</button>
+                            <button type="button" id="cancelEditBtn" class="btn btn-small"
+                                style="width: 100%; margin-top:5px; background:#ccc; display:none;">İptal</button>
                         </form>
                     </div>
 
