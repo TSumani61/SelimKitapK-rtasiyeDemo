@@ -33,120 +33,64 @@
     <!-- Main Header & Nav -->
     <header>
         <div class="container header-content">
-            <a href="/" class="logo">Selim<span>Kitap</span></a>
+            <a href="index.html" class="brand-logo">
+                <div class="logo-ellipse">selim</div>
+                <div class="logo-sub">Kitap & Kırtasiye</div>
+            </a>
 
             <nav>
                 <ul class="nav-list">
-                    <li><a href="#" class="filter-trigger active" data-category="all">Anasayfa</a></li>
-                    <li><a href="#" class="filter-trigger" data-category="all">Ürünler</a></li>
-                    <li><a href="#" class="filter-trigger" data-category="Defter">Defterler</a></li>
-                    <li><a href="#" class="filter-trigger" data-category="Kalem">Kalemler</a></li>
-                    <li><a href="#" class="filter-trigger" data-category="Kalem">Kalemler</a></li>
+                    <li><a href="index.html" class="filter-trigger active" data-category="all">Anasayfa</a></li>
                     <li><a href="duyurular.html">Duyurular</a></li>
-                    <li><a href="#contact">İletişim</a></li>
+                    <li><a href="contact.html">İletişim</a></li>
                 </ul>
             </nav>
 
             <!-- Optional: Right side element like a contact button or social icon -->
             <div class="header-right" style="display: flex; gap: 1rem;">
-                <a href="#contact" class="btn btn-small" style="padding: 0.5rem 1.2rem; font-size: 0.8rem;">Bize
+                <a href="contact.html" class="btn btn-small" style="padding: 0.5rem 1.2rem; font-size: 0.8rem;">Bize
                     Ulaşın</a>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container hero-grid">
-            <div class="hero-text">
-                <h4 data-aos="fade-up">Okula & Ofise Dönüş</h4>
-                <h1>Hayalindeki Kırtasiye <br>Ürünlerini Keşfet</h1>
-                <p>En prestijli markalar, özel tasarım defterler ve profesyonel sanat malzemeleri tek adreste.</p>
-
-                <a href="#productGrid" class="btn btn-outline" style="margin-left: 1rem;">Koleksiyonlar</a>
-            </div>
-            <div class="hero-image">
-                <!-- Using a visually rich placeholder image representing stationery -->
-                <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1000&q=80"
-                    alt="Kırtasiye Koleksiyonu">
-                <div class="hero-badges">
-                    <span>%25</span>
-                    <small>İndirim</small>
-                </div>
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Ürün ara... (ör. Kalem, Defter)">
+                <button id="searchBtn"><i class="fa-solid fa-search"></i></button>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section class="services-section">
-        <div class="container service-grid">
-            <div class="service-item">
-                <i class="fa-solid fa-truck-fast"></i>
-                <div class="service-text">
-                    <h4>Ücretsiz Kargo</h4>
-                    <p>250 TL üzeri siparişlerde</p>
+    <!-- Main Slider Section -->
+    <section class="slider-section">
+        <div class="container">
+            <div class="main-slider" id="mainSlider">
+                <div class="slider-wrapper" id="sliderWrapper">
+                    <!-- Slides injected via JS -->
                 </div>
-            </div>
-            <div class="service-item">
-                <i class="fa-solid fa-headset"></i>
-                <div class="service-text">
-                    <h4>7/24 Destek</h4>
-                    <p>Her zaman yanınızdayız</p>
-                </div>
-            </div>
-            <div class="service-item">
-                <i class="fa-solid fa-wallet"></i>
-                <div class="service-text">
-                    <h4>Güvenli Ödeme</h4>
-                    <p>256-bit SSL Koruması</p>
-                </div>
-            </div>
-            <div class="service-item">
-                <i class="fa-solid fa-rotate-left"></i>
-                <div class="service-text">
-                    <h4>Kolay İade</h4>
-                    <p>14 gün içinde iade imkanı</p>
-                </div>
+                <button class="slider-prev"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="slider-next"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="slider-dots" id="sliderDots"></div>
             </div>
         </div>
     </section>
 
-    <!-- Categories Section -->
-    <section class="categories-section">
+    <!-- Product Carousel Section -->
+    <section class="carousel-section">
         <div class="container">
             <div class="section-title">
-                <h2>Popüler Kategoriler</h2>
-                <p>İhtiyacınız olan her şey, özenle seçilmiş kategorilerde.</p>
+                <h2>Vitrin</h2>
+                <p>Haftanın öne çıkan ürünleri</p>
             </div>
-            <div class="category-grid">
-                <div class="category-card filter-trigger" data-category="Defter">
-                    <img src="https://images.unsplash.com/photo-1531346878377-a513bc95f30f?auto=format&fit=crop&w=500&q=80"
-                        alt="Defterler">
-                    <div class="cat-overlay">
-                        <h3>Defterler</h3>
-                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
-                                class="fa-solid fa-arrow-right"></i></span>
-                    </div>
+            <div class="product-carousel-wrapper">
+                <button class="carousel-btn prev"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="product-carousel" id="productCarousel">
+                    <!-- Carousel items injected via JS -->
                 </div>
-                <div class="category-card filter-trigger" data-category="Kalem">
-                    <img src="https://images.unsplash.com/photo-1565538420870-da5852136e47?auto=format&fit=crop&w=500&q=80"
-                        alt="Kalemler">
-                    <div class="cat-overlay">
-                        <h3>Kalemler</h3>
-                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
-                                class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-                <div class="category-card filter-trigger" data-category="Çanta">
-                    <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80"
-                        alt="Çantalar">
-                    <div class="cat-overlay">
-                        <h3>Çantalar</h3>
-                        <span style="font-size: 0.9rem; text-decoration: underline;">İncele <i
-                                class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-
+                <button class="carousel-btn next"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
         </div>
     </section>
@@ -154,21 +98,30 @@
     <!-- Products Section -->
     <section class="products-section">
         <div class="container">
-            <div class="section-title">
-                <h2>Öne Çıkan Ürünler</h2>
-                <p>En çok tercih edilen, en yeni kırtasiye ürünleri.</p>
-            </div>
+            <div class="product-layout-wrapper">
+                <!-- Left Sidebar -->
+                <aside class="product-sidebar">
+                    <div class="sidebar-widget">
+                        <h3>Kategoriler</h3>
+                        <ul class="sidebar-list" id="categorySidebarList">
+                            <!-- Injected by JS -->
+                            <li><a href="#" class="active">Tümü</a></li>
+                        </ul>
+                    </div>
+                </aside>
 
-            <div class="tab-buttons">
-                <button class="filter-btn active" data-category="all">Tümü</button>
-                <button class="filter-btn" data-category="Defter">Defter</button>
-                <button class="filter-btn" data-category="Kalem">Kalem</button>
-                <button class="filter-btn" data-category="Çanta">Çanta</button>
-                <button class="filter-btn" data-category="Ofis">Ofis</button>
-            </div>
+                <!-- Main Content -->
+                <main class="product-main">
+                    <div class="product-toolbar">
+                        <h2 id="categoryTitle">Tüm Ürünler</h2>
+                        <span id="resultCount" style="color: var(--text-light); font-size: 0.9rem;">0 ürün
+                            listelendi</span>
+                    </div>
 
-            <div class="product-grid-container" id="productGrid">
-                <!-- Products injected via JS -->
+                    <div class="product-grid-container" id="productGrid">
+                        <!-- Products injected via JS -->
+                    </div>
+                </main>
             </div>
         </div>
     </section>
@@ -180,8 +133,10 @@
         <div class="container">
             <div class="footer-top">
                 <div class="footer-col">
-                    <a href="#" class="logo"
-                        style="margin-bottom: 1rem; display: block; filter: brightness(0) invert(1);">Selim<span>Kitap</span></a>
+                    <a href="#" class="brand-logo" style="align-items: flex-start; margin-bottom: 1rem;">
+                        <div class="logo-ellipse" style="font-size: 1.5rem; padding: 5px 20px;">selim</div>
+                        <div class="logo-sub" style="color: #b2bec3;">Kitap & Kırtasiye</div>
+                    </a>
                     <p>2010 yılından beri en kaliteli kırtasiye ürünlerini sizlerle buluşturuyoruz. Müşteri memnuniyeti
                         bizim önceliğimizdir.</p>
                     <div class="footer-socials">

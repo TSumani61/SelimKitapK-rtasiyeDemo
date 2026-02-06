@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productTableBody = document.getElementById('productTableBody');
     const totalProductsCount = document.getElementById('totalProductsCount');
     const pCategorySelect = document.getElementById('pCategory');
+    const filterCategorySelect = document.getElementById('filterCategory');
 
     // Category Elements
     const categoryForm = document.getElementById('categoryForm');
@@ -101,12 +102,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Product Logic ---
     function loadProducts() {
-        const products = JSON.parse(localStorage.getItem('products')) || [];
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        const filterVal = filterCategorySelect ? filterCategorySelect.value : 'all';
+
+        // Filter if active
+        if (filterVal !== 'all') {
+            products = products.filter(p => p.category === filterVal);
+        }
+
         totalProductsCount.innerText = `${products.length} Ürün`;
         productTableBody.innerHTML = '';
 
         if (products.length === 0) {
-            productTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Henüz ürün bulunmuyor.</td></tr>';
+            productTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">Ürün bulunamadı.</td></tr>';
             return;
         }
 
@@ -118,6 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="badge badge-primary" style="background:#e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${p.category}</span></td>
                 <td style="font-weight: bold; color: var(--dark);">${parseFloat(p.price).toFixed(2)} TL</td>
                 <td>
+                     <button class="btn btn-small" onclick="toggleShowcase(${p.id})" style="margin-right:5px; background: ${p.isShowcase ? '#ffd700' : '#eee'}; color: ${p.isShowcase ? '#000' : '#999'};" title="Vitrin Durumu">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
                     <button class="btn btn-small btn-danger" onclick="deleteProduct(${p.id})" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #ffebee; color: #c62828;">
                         <i class="fa-solid fa-trash"></i>
                     </button>
@@ -127,6 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Filter Listener
+    if (filterCategorySelect) {
+        filterCategorySelect.addEventListener('change', loadProducts);
+    }
+
     productForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const newProduct = {
@@ -134,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: document.getElementById('pName').value,
             price: parseFloat(document.getElementById('pPrice').value),
             category: document.getElementById('pCategory').value,
-            image: document.getElementById('pImage').value
+            image: document.getElementById('pImage').value,
+            isShowcase: document.getElementById('pShowcase').checked
         };
 
         const products = JSON.parse(localStorage.getItem('products')) || [];
@@ -145,6 +162,17 @@ document.addEventListener('DOMContentLoaded', () => {
         productForm.reset();
         alert('Ürün başarıyla eklendi!');
     });
+
+    window.toggleShowcase = (id) => {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        const index = products.findIndex(p => p.id === id);
+        if (index > -1) {
+            products[index].isShowcase = !products[index].isShowcase;
+            localStorage.setItem('products', JSON.stringify(products));
+            loadProducts();
+            // Optional: Alert or toast
+        }
+    }
 
     window.deleteProduct = (id) => {
         if (!confirm('Silmek istediğinize emin misiniz?')) return;
@@ -162,15 +190,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Separate Parents and Children
         const parents = categories.filter(c => !c.parentId);
 
-        // Populate Select Boxes (Product & Parent Cat Select)
+        // Populate Select Boxes (Product & Parent Cat Select & Filter)
         pCategorySelect.innerHTML = '';
         parentCategorySelect.innerHTML = '<option value="">Yok (Ana Kategori)</option>';
+        if (filterCategorySelect) filterCategorySelect.innerHTML = '<option value="all">Tüm Kategoriler</option>';
 
         parents.forEach(parent => {
             // Add Parent to selects
             const pOpt1 = new Option(parent.name, parent.name);
             pOpt1.style.fontWeight = 'bold';
             pCategorySelect.add(pOpt1);
+
+            if (filterCategorySelect) {
+                const fOpt1 = new Option(parent.name, parent.name);
+                fOpt1.style.fontWeight = 'bold';
+                filterCategorySelect.add(fOpt1);
+            }
 
             const pOpt2 = new Option(parent.name, parent.id); // Value is ID for parent selector
             parentCategorySelect.add(pOpt2);
@@ -180,6 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
             children.forEach(child => {
                 const cOpt = new Option(`- ${child.name}`, child.name);
                 pCategorySelect.add(cOpt);
+                if (filterCategorySelect) {
+                    const fOpt2 = new Option(`- ${child.name}`, child.name);
+                    filterCategorySelect.add(fOpt2);
+                }
             });
         });
 
@@ -304,5 +343,84 @@ document.addEventListener('DOMContentLoaded', () => {
         announcements = announcements.filter(a => a.id !== id);
         localStorage.setItem('announcements', JSON.stringify(announcements));
         loadAnnouncements();
+    }
+
+    // --- SLIDER LOGIC ---
+    const sliderForm = document.getElementById('sliderForm');
+    const sliderListContainer = document.getElementById('sliderListContainer');
+
+    function loadSliderImages() {
+        const images = JSON.parse(localStorage.getItem('sliderImages')) || [];
+        sliderListContainer.innerHTML = '';
+
+        if (images.length === 0) {
+            sliderListContainer.innerHTML = '<p style="padding:1rem;">Slider görseli yok. Varsayılanlar gösteriliyor.</p>';
+            return;
+        }
+
+        images.forEach((img, index) => {
+            const div = document.createElement('div');
+            div.className = 'cat-list-item';
+            div.innerHTML = `
+                <img src="${img}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 1rem;">
+                <div style="flex:1; word-break: break-all;">${img}</div>
+                <button onclick="deleteSliderImage(${index})" class="btn btn-small" style="color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
+            `;
+            sliderListContainer.appendChild(div);
+        });
+    }
+
+    if (sliderForm) {
+        sliderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const url = document.getElementById('sliderUrl').value;
+
+            let images = JSON.parse(localStorage.getItem('sliderImages')) || [];
+            images.push(url);
+            localStorage.setItem('sliderImages', JSON.stringify(images));
+
+            loadSliderImages();
+            sliderForm.reset();
+            alert('Görsel eklendi!');
+        });
+    }
+
+    window.deleteSliderImage = (index) => {
+        if (!confirm('Görseli silmek istediğinize emin misiniz?')) return;
+        let images = JSON.parse(localStorage.getItem('sliderImages')) || [];
+        images.splice(index, 1);
+        localStorage.setItem('sliderImages', JSON.stringify(images));
+        loadSliderImages();
+    }
+
+    // Initial Load for Slider Tab
+    loadSliderImages();
+
+    // Extend Switch Tab
+    const oldSwitchTab = window.switchTab;
+    window.switchTab = (tabName) => {
+        // Toggle Buttons
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            const btnText = btn.innerText.toLowerCase();
+            if (tabName === 'products' && btnText.includes('ürünler')) btn.classList.add('active');
+            else if (tabName === 'categories' && btnText.includes('kategoriler')) btn.classList.add('active');
+            else if (tabName === 'announcements' && btnText.includes('duyurular')) btn.classList.add('active');
+            else if (tabName === 'slider' && btnText.includes('slider')) btn.classList.add('active');
+        });
+
+        // Toggle Content
+        document.getElementById('productsTab').classList.add('hidden');
+        document.getElementById('categoriesTab').classList.add('hidden');
+        document.getElementById('announcementsTab').classList.add('hidden');
+        document.getElementById('sliderTab').classList.add('hidden');
+
+        if (tabName === 'products') document.getElementById('productsTab').classList.remove('hidden');
+        else if (tabName === 'categories') document.getElementById('categoriesTab').classList.remove('hidden');
+        else if (tabName === 'announcements') document.getElementById('announcementsTab').classList.remove('hidden');
+        else if (tabName === 'slider') {
+            document.getElementById('sliderTab').classList.remove('hidden');
+            loadSliderImages();
+        }
     }
 });

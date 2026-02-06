@@ -44,7 +44,8 @@
             cursor: pointer;
             border-radius: 8px;
             font-weight: 500;
-            color: #666;
+            color: #2d3436;
+            /* Dark Text */
             transition: all 0.3s;
             width: 100%;
             display: flex;
@@ -53,13 +54,18 @@
         }
 
         .admin-tab-btn:hover {
-            background: #f0f4ff;
-            color: var(--primary-color);
+            background: #e3f2fd;
+            /* Light Blue Hover */
+            color: #d63031;
+            /* Burgundy Text on Hover */
         }
 
         .admin-tab-btn.active {
-            background: var(--primary-color);
-            color: #fff;
+            background: #d63031;
+            /* Burgundy Active BG */
+            color: #fff !important;
+            /* White Text Force */
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
         }
 
         .main-content {
@@ -201,12 +207,20 @@
     <div id="adminPanel" class="admin-layout hidden">
         <!-- Sidebar -->
         <div class="sidebar">
-            <h2>SelimKitap</h2>
+            <a href="index.html" style="text-decoration:none;">
+                <h2>SelimKitap</h2>
+            </a>
             <nav>
+                <a href="index.html" class="admin-tab-btn"
+                    style="text-decoration:none; color: var(--primary); font-weight:bold; margin-bottom: 20px; border: 1px solid var(--primary);">
+                    <i class="fa-solid fa-arrow-left"></i> Siteye Git
+                </a>
                 <button class="admin-tab-btn active" onclick="switchTab('products')"><i class="fa-solid fa-box"></i>
                     Ürünler</button>
                 <button class="admin-tab-btn" onclick="switchTab('categories')"><i class="fa-solid fa-list"></i>
                     Kategoriler</button>
+                <button class="admin-tab-btn" onclick="switchTab('slider')"><i class="fa-solid fa-images"></i>
+                    Slider</button>
                 <button class="admin-tab-btn" onclick="switchTab('announcements')"><i class="fa-solid fa-bullhorn"></i>
                     Duyurular</button>
                 <div style="flex-grow: 1;"></div>
@@ -245,14 +259,28 @@
                                 <label>Resim URL</label>
                                 <input type="url" id="pImage" class="form-input" placeholder="https://..." required>
                             </div>
+                            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="pShowcase" style="width: auto;">
+                                <label for="pShowcase" style="margin:0; cursor:pointer;">Vitrinde Göster (Haftanın
+                                    Ürünü)</label>
+                            </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
                         </form>
                     </div>
 
                     <!-- List Products -->
                     <div class="admin-card">
-                        <h3>Mevcut Ürünler</h3>
-                        <div style="margin-bottom: 10px; font-weight: bold;" id="totalProductsCount">0 Ürün</div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Mevcut Ürünler</h3>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <select id="filterCategory" class="form-input" style="padding: 5px; width: 200px;">
+                                    <option value="all">Tüm Kategoriler</option>
+                                    <!-- Populated by JS -->
+                                </select>
+                                <div style="font-weight: bold;" id="totalProductsCount">0 Ürün</div>
+                            </div>
+                        </div>
                         <div style="max-height: 500px; overflow-y: auto;">
                             <table>
                                 <thead>
@@ -335,6 +363,32 @@
                     <div class="admin-card">
                         <h3>Yayındaki Duyurular</h3>
                         <div class="category-list" id="announcementListContainer">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDER TAB -->
+            <div id="sliderTab" class="hidden">
+                <h2 class="panel-title">Slider Yönetimi</h2>
+                <div class="admin-grid">
+                    <!-- Add Slider Image -->
+                    <div class="admin-card">
+                        <h3>Yeni Slider Görseli Ekle</h3>
+                        <form id="sliderForm">
+                            <div class="form-group">
+                                <label>Görsel URL</label>
+                                <input type="url" id="sliderUrl" class="form-input" placeholder="https://..." required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
+                        </form>
+                    </div>
+
+                    <!-- List Slider Images -->
+                    <div class="admin-card">
+                        <h3>Mevcut Slider Görselleri</h3>
+                        <div class="category-list" id="sliderListContainer">
                             <!-- Populated by JS -->
                         </div>
                     </div>
