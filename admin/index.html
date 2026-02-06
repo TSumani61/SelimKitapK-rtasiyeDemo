@@ -7,8 +7,10 @@
     <title>Yönetim Paneli - Selim Kitap Kırtasiye</title>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Main Style (Reusing some styles) -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Main Style (Corrected Path) -->
+    <link rel="stylesheet" href="../style.css">
+    <!-- SheetJS for Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* Admin Specific Overrides */
         body {
@@ -45,7 +47,6 @@
             border-radius: 8px;
             font-weight: 500;
             color: #2d3436;
-            /* Dark Text */
             transition: all 0.3s;
             width: 100%;
             display: flex;
@@ -55,16 +56,12 @@
 
         .admin-tab-btn:hover {
             background: #e3f2fd;
-            /* Light Blue Hover */
             color: #d63031;
-            /* Burgundy Text on Hover */
         }
 
         .admin-tab-btn.active {
             background: #d63031;
-            /* Burgundy Active BG */
             color: #fff !important;
-            /* White Text Force */
             box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
         }
 
@@ -143,18 +140,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background: #f9f9f9;
+            padding: 10px 15px;
+            background: #fff;
             margin-bottom: 8px;
             border-radius: 6px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .sub-cat-item {
-            margin-left: 20px;
-            border-left: 2px solid #ddd;
-            padding-left: 10px;
+            margin-left: 25px;
+            border-left: 3px solid var(--primary-color);
+            padding-left: 15px;
             font-size: 0.9rem;
-            background: #fff;
+            background: #f8f9fa;
+            /* Lighter gray for contrast */
+            border: 1px solid #eee;
+            border-left: 3px solid #d63031;
+            /* Keeping accent */
         }
 
         .hidden {
@@ -207,11 +210,11 @@
     <div id="adminPanel" class="admin-layout hidden">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="index.html" style="text-decoration:none;">
+            <a href="../index.html" style="text-decoration:none;">
                 <h2>SelimKitap</h2>
             </a>
             <nav>
-                <a href="index.html" class="admin-tab-btn"
+                <a href="../index.html" class="admin-tab-btn"
                     style="text-decoration:none; color: var(--primary); font-weight:bold; margin-bottom: 20px; border: 1px solid var(--primary);">
                     <i class="fa-solid fa-arrow-left"></i> Siteye Git
                 </a>
@@ -276,6 +279,15 @@
                             <button type="button" id="cancelEditBtn" class="btn btn-small"
                                 style="width: 100%; margin-top:5px; background:#ccc; display:none;">İptal</button>
                         </form>
+
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                            <h4>Toplu Yükleme (Excel)</h4>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="file" id="excelFile" accept=".xlsx, .xls" class="form-input">
+                                <button onclick="uploadExcel()" class="btn btn-primary">Yükle</button>
+                            </div>
+                            <small>Sütunlar: Ad, Fiyat, Kategori, Resim, Açıklama</small>
+                        </div>
                     </div>
 
                     <!-- List Products -->
@@ -299,7 +311,7 @@
                                         <th>Ürün Adı</th>
                                         <th>Kategori</th>
                                         <th>Fiyat</th>
-                                        <th width="50">İşlem</th>
+                                        <th width="120">İşlem</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productTableBody">
@@ -355,11 +367,7 @@
                     <div class="admin-card">
                         <h3>Duyuru Yayınla</h3>
                         <form id="announcementForm">
-                            <div class="form-group">
-                                <label>Başlık</label>
-                                <input type="text" id="annTitle" class="form-input" placeholder="Duyuru Başlığı"
-                                    required>
-                            </div>
+                            <!-- Title Removed -->
                             <div class="form-group">
                                 <label>İçerik</label>
                                 <textarea id="annContent" class="form-input" rows="4" placeholder="Duyuru içeriği..."
@@ -408,7 +416,11 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../admin.js"></script>
 </body>
 
 </html>

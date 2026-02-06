@@ -69,14 +69,15 @@
     <div class="top-bar">
         <div class="container">
             <div class="top-info">
-                <span><i class="fa-solid fa-phone"></i> +90 212 555 55 55</span>
+                <span><i class="fa-solid fa-phone"></i> 0539 346 61 86 / 0462 746 20 04</span>
                 <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
             </div>
             <div class="top-socials">
                 <span>Bizi Takip Edin:</span>
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://wa.me/905393466186" target="_blank" style="margin-left: 10px;"><i
+                        class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </div>
@@ -141,26 +142,38 @@
         </div>
     </footer>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        const db = firebase.firestore();
+
+        document.addEventListener('DOMContentLoaded', async () => {
             const container = document.getElementById('announcementList');
-            const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
 
-            if (announcements.length > 0) {
-                container.innerHTML = '';
-                // Sort by date new to old
-                announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+            try {
+                const snap = await db.collection('announcements').get();
+                const announcements = snap.docs.map(doc => doc.data());
 
-                announcements.forEach(ann => {
-                    const card = document.createElement('div');
-                    card.className = 'ann-card';
-                    card.innerHTML = `
-                        <div class="ann-date"><i class="fa-regular fa-calendar"></i> ${new Date(ann.date).toLocaleDateString('tr-TR')}</div>
-                        <h3 class="ann-title">${ann.title}</h3>
-                        <div class="ann-content">${ann.content}</div>
-                    `;
-                    container.appendChild(card);
-                });
+                if (announcements.length > 0) {
+                    container.innerHTML = '';
+                    // Sort by date new to old
+                    announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    announcements.forEach(ann => {
+                        const card = document.createElement('div');
+                        card.className = 'ann-card';
+                        card.innerHTML = `
+                            <div class="ann-date"><i class="fa-regular fa-calendar"></i> ${new Date(ann.date).toLocaleDateString('tr-TR')}</div>
+                            <div class="ann-content" style="font-size: 1.1rem; line-height: 1.6;">${ann.content}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                console.error("Duyurular yüklenemedi:", error);
             }
         });
     </script>

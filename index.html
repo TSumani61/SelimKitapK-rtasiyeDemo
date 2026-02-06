@@ -17,15 +17,15 @@
     <div class="top-bar">
         <div class="container">
             <div class="top-info">
-                <span><i class="fa-solid fa-phone"></i> +90 212 555 55 55</span>
+                <span><i class="fa-solid fa-phone"></i> 0539 346 61 86 / 0462 746 20 04</span>
                 <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
             </div>
             <div class="top-socials">
                 <span>Bizi Takip Edin:</span>
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+                <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
+                        class="fa-brands fa-instagram"></i></a>
+                <a href="https://wa.me/905393466186" target="_blank" style="margin-left: 10px;"><i
+                        class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </div>
@@ -142,12 +142,17 @@
                     <div class="footer-socials">
                         <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
                                 class="fa-brands fa-instagram"></i></a>
+                        <a href="https://wa.me/905393466186" target="_blank"
+                            style="width: auto !important; padding: 0 12px; margin-left: 10px; border-radius: 20px; gap: 8px; text-decoration: none;">
+                            <i class="fa-brands fa-whatsapp" style="color: #25D366; font-size: 1.2rem;"></i>
+                            <span>0539 346 61 86</span>
+                        </a>
                     </div>
                 </div>
                 <!-- Quick Links Removed -->
                 <div class="footer-col">
                     <h5>Kategoriler</h5>
-                    <ul class="footer-links">
+                    <ul class="footer-links" id="footerCategories">
                         <li><a href="#">Okul Defterleri</a></li>
                         <li><a href="#">Dolma Kalemler</a></li>
                         <li><a href="#">Sırt Çantaları</a></li>
@@ -166,12 +171,14 @@
                     </div>
                     <div class="contact-row">
                         <i class="fa-solid fa-phone"></i>
-                        <span><a href="tel:+904627462004" style="color: inherit;">+90 462 746 20 04</a><br>
+                        <span>
+                            <a href="tel:+905393466186" style="color: inherit;">0539 346 61 86</a><br>
+                            <a href="tel:+904627462004" style="color: inherit;">0462 746 20 04</a><br>
                             <small style="opacity: 0.8;">Telefonu göster</small></span>
                     </div>
                     <div class="contact-row">
                         <i class="fa-solid fa-clock"></i>
-                        <span>Mesai Saatleri: <br>Açılış 07:00</span>
+                        <span>Mesai Saatleri: <br>07:30 - 19:00 (Paz - Kapalı)</span>
                     </div>
                     <div class="contact-row">
                         <i class="fa-solid fa-envelope"></i>
@@ -208,6 +215,10 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="main.js"></script>
 </body>
 

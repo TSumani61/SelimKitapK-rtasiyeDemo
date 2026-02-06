@@ -1,3 +1,6 @@
+// Firebase Initialization
+const db = firebase.firestore();
+
 // Global Functions to ensure they work from HTML if needed
 window.GLOBAL_DATA = {
     products: [],
@@ -8,49 +11,28 @@ window.GLOBAL_DATA = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    initData();
-    initApp();
+    initData().then(() => {
+        initApp();
+    });
 });
 
-function initData() {
-    // 1. Load Products
-    const mockProducts = [
-        { id: 1, name: 'Premium Deri Defter', price: 250, category: 'Defter', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80', isShowcase: true },
-        { id: 2, name: 'Altın Kaplama Dolma Kalem', price: 1200, category: 'Kalem', image: 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&w=800&q=80', isShowcase: false },
-        { id: 3, name: 'Deri Evrak Çantası', price: 3500, category: 'Çanta', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', isShowcase: true },
-        { id: 4, name: 'Masa Düzenleyici Set', price: 850, category: 'Ofis', image: 'https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?auto=format&fit=crop&w=800&q=80', isShowcase: false },
-        { id: 5, name: 'Mat Siyah Kurşun Kalem Seti', price: 120, category: 'Kalem', image: 'https://images.unsplash.com/photo-1595064506822-628d488e364c?auto=format&fit=crop&w=800&q=80', isShowcase: false }
-    ];
+async function initData() {
+    try {
+        console.log("Fetching data from Firestore...");
+        const [pSnap, cSnap, sSnap] = await Promise.all([
+            db.collection('products').get(),
+            db.collection('categories').get(),
+            db.collection('sliderImages').get()
+        ]);
 
-    if (!localStorage.getItem('products')) {
-        localStorage.setItem('products', JSON.stringify(mockProducts));
+        window.GLOBAL_DATA.products = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.GLOBAL_DATA.categories = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.GLOBAL_DATA.sliderImages = sSnap.docs.map(d => d.data().url);
+
+        console.log("Data loaded:", window.GLOBAL_DATA);
+    } catch (error) {
+        console.error("Error loading data:", error);
     }
-    window.GLOBAL_DATA.products = JSON.parse(localStorage.getItem('products')) || [];
-
-    // 2. Load Categories
-    const mockCats = [
-        { id: 1, name: 'Kırtasiye', parentId: null },
-        { id: 2, name: 'Defter', parentId: 1 },
-        { id: 3, name: 'Kalem', parentId: 1 },
-        { id: 4, name: 'Çanta', parentId: null },
-        { id: 5, name: 'Ofis', parentId: null }
-    ];
-
-    if (!localStorage.getItem('categories')) {
-        localStorage.setItem('categories', JSON.stringify(mockCats));
-    }
-    window.GLOBAL_DATA.categories = JSON.parse(localStorage.getItem('categories')) || [];
-
-    // 3. Load Slider
-    let sImages = JSON.parse(localStorage.getItem('sliderImages')) || [];
-    if (sImages.length === 0) {
-        sImages = [
-            'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1456735190827-d1261f7add50?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80'
-        ];
-    }
-    window.GLOBAL_DATA.sliderImages = sImages;
 }
 
 function initApp() {
@@ -58,6 +40,7 @@ function initApp() {
     renderProducts('all');
     renderSlider();
     renderCarousel();
+    renderFooterCategories();
     initModalListeners();
 
     // Attach Search Listener Manually
@@ -84,6 +67,12 @@ function renderSlider() {
 
     wrapper.innerHTML = '';
     if (dots) dots.innerHTML = '';
+
+    if (window.GLOBAL_DATA.sliderImages.length === 0) {
+        // Fallback or empty state
+        wrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;">Görsel Yok</div>';
+        return;
+    }
 
     window.GLOBAL_DATA.sliderImages.forEach((img, idx) => {
         // Slide
@@ -114,6 +103,7 @@ function renderSlider() {
 }
 
 window.changeSlide = function (dir) {
+    if (window.GLOBAL_DATA.sliderImages.length === 0) return;
     let newIdx = window.GLOBAL_DATA.sliderIndex + dir;
     const total = window.GLOBAL_DATA.sliderImages.length;
 
@@ -144,9 +134,11 @@ function updateSliderUI() {
 
 function startAutoSlide() {
     if (window.GLOBAL_DATA.sliderInterval) clearInterval(window.GLOBAL_DATA.sliderInterval);
-    window.GLOBAL_DATA.sliderInterval = setInterval(() => {
-        changeSlide(1);
-    }, 5000);
+    if (window.GLOBAL_DATA.sliderImages.length > 1) {
+        window.GLOBAL_DATA.sliderInterval = setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+    }
 }
 
 function resetAutoSlide() {
@@ -179,6 +171,7 @@ function renderCarousel() {
     if (!c) return;
 
     const prods = window.GLOBAL_DATA.products.filter(p => p.isShowcase);
+    // If no showcase, maybe show latest?
     const displayProds = prods.length > 0 ? prods : window.GLOBAL_DATA.products.slice(0, 10);
 
     c.innerHTML = '';
@@ -341,6 +334,34 @@ function renderSidebar(active) {
             }
         }
 
+        list.appendChild(li);
+    });
+}
+
+function renderFooterCategories() {
+    const list = document.getElementById('footerCategories');
+    if (!list) return;
+
+    list.innerHTML = '';
+    const parents = window.GLOBAL_DATA.categories.filter(c => !c.parentId);
+
+    if (parents.length === 0) {
+        return;
+    }
+
+    parents.slice(0, 8).forEach(p => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.innerText = p.name;
+        a.onclick = (e) => {
+            e.preventDefault();
+            renderProducts(p.name);
+            renderSidebar(p.name);
+            const grid = document.getElementById('productGrid');
+            if (grid) grid.scrollIntoView({ behavior: 'smooth' });
+        };
+        li.appendChild(a);
         list.appendChild(li);
     });
 }
