@@ -1,388 +1,308 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const grid = document.getElementById('productGrid');
-    const extraFilterTriggers = document.querySelectorAll('.filter-trigger');
-    const categorySidebarList = document.getElementById('categorySidebarList');
-    const categoryTitle = document.getElementById('categoryTitle');
-    const resultCount = document.getElementById('resultCount');
+// Global Functions to ensure they work from HTML if needed
+window.GLOBAL_DATA = {
+    products: [],
+    categories: [],
+    sliderImages: [],
+    sliderIndex: 0,
+    sliderInterval: null
+};
 
-    // Default Mock Data
-    const MOCK_DATA = [
-        { id: 1, name: 'Premium Deri Defter', price: 250, category: 'Defter', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80' },
-        { id: 2, name: 'Altın Kaplama Dolma Kalem', price: 1200, category: 'Kalem', image: 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&w=800&q=80' },
-        { id: 3, name: 'Deri Evrak Çantası', price: 3500, category: 'Çanta', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80' },
-        { id: 4, name: 'Masa Düzenleyici Set', price: 850, category: 'Ofis', image: 'https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?auto=format&fit=crop&w=800&q=80' },
-        { id: 5, name: 'Mat Siyah Kurşun Kalem Seti', price: 120, category: 'Kalem', image: 'https://images.unsplash.com/photo-1595064506822-628d488e364c?auto=format&fit=crop&w=800&q=80' }
+document.addEventListener('DOMContentLoaded', () => {
+    initData();
+    initApp();
+});
+
+function initData() {
+    // 1. Load Products
+    const mockProducts = [
+        { id: 1, name: 'Premium Deri Defter', price: 250, category: 'Defter', image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80', isShowcase: true },
+        { id: 2, name: 'Altın Kaplama Dolma Kalem', price: 1200, category: 'Kalem', image: 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&w=800&q=80', isShowcase: false },
+        { id: 3, name: 'Deri Evrak Çantası', price: 3500, category: 'Çanta', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80', isShowcase: true },
+        { id: 4, name: 'Masa Düzenleyici Set', price: 850, category: 'Ofis', image: 'https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?auto=format&fit=crop&w=800&q=80', isShowcase: false },
+        { id: 5, name: 'Mat Siyah Kurşun Kalem Seti', price: 120, category: 'Kalem', image: 'https://images.unsplash.com/photo-1595064506822-628d488e364c?auto=format&fit=crop&w=800&q=80', isShowcase: false }
     ];
 
-    // Initialize Data if empty
     if (!localStorage.getItem('products')) {
-        localStorage.setItem('products', JSON.stringify(MOCK_DATA));
+        localStorage.setItem('products', JSON.stringify(mockProducts));
     }
+    window.GLOBAL_DATA.products = JSON.parse(localStorage.getItem('products')) || [];
 
-    // Seed Categories if empty (For Sidebar Demo)
+    // 2. Load Categories
+    const mockCats = [
+        { id: 1, name: 'Kırtasiye', parentId: null },
+        { id: 2, name: 'Defter', parentId: 1 },
+        { id: 3, name: 'Kalem', parentId: 1 },
+        { id: 4, name: 'Çanta', parentId: null },
+        { id: 5, name: 'Ofis', parentId: null }
+    ];
+
     if (!localStorage.getItem('categories')) {
-        const defaultCats = [
-            { id: 1, name: 'Kırtasiye', parentId: null },
-            { id: 2, name: 'Defter', parentId: 1 },
-            { id: 3, name: 'Kalem', parentId: 1 },
-            { id: 4, name: 'Çanta', parentId: null },
-            { id: 5, name: 'Ofis', parentId: null }
-        ];
-        localStorage.setItem('categories', JSON.stringify(defaultCats));
+        localStorage.setItem('categories', JSON.stringify(mockCats));
     }
+    window.GLOBAL_DATA.categories = JSON.parse(localStorage.getItem('categories')) || [];
 
-    const allCategories = JSON.parse(localStorage.getItem('categories')) || [];
-    let activeCategoryState = 'all'; // Current active filter
+    // 3. Load Slider
+    let sImages = JSON.parse(localStorage.getItem('sliderImages')) || [];
+    if (sImages.length === 0) {
+        sImages = [
+            'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1456735190827-d1261f7add50?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80'
+        ];
+    }
+    window.GLOBAL_DATA.sliderImages = sImages;
+}
 
-    // Initial Render
+function initApp() {
     renderSidebar('all');
     renderProducts('all');
-    initCarousel();
-    initSlider(); // Ensure slider is also called if it exists
+    renderSlider();
+    renderCarousel();
 
-    // --- SEARCH LOGIC ---
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-
-    function performSearch(query) {
-        query = query.toLowerCase();
-        renderProducts(activeCategoryState, query);
-        // Optional: Scroll to products when searching
-        if (!query) return; // Don't scroll on empty clear
-        const gridEl = document.getElementById('productGrid');
-        if (gridEl) {
-            // Only scroll if we are far away, e.g. top of page
-            if (window.scrollY < 300) {
-                gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            performSearch(e.target.value);
-        });
-
-        searchInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                performSearch(searchInput.value);
-                // Force scroll on Enter
-                const gridEl = document.getElementById('productGrid');
-                if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    }
-
-    if (searchBtn && searchInput) {
-        searchBtn.addEventListener('click', () => {
-            performSearch(searchInput.value);
-            const gridEl = document.getElementById('productGrid');
-            if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    // --- SIDEBAR RENDER LOGIC ---
-    function renderSidebar(activeCatName) {
-        if (!categorySidebarList) return;
-        categorySidebarList.innerHTML = '';
-
-        // Determine hierarchy context
-        // 1. Is 'activeCatName' a main category?
-        // 2. Is it a subcategory?
-        // 3. Is it 'all'?
-
-        let displayCats = [];
-        let parentCat = null;
-        let showBackButton = false;
-
-        const activeCatObj = allCategories.find(c => c.name === activeCatName);
-
-        if (activeCatName === 'all' || !activeCatObj) {
-            // Show all Top Level Categories or Unparented categories
-            displayCats = allCategories.filter(c => !c.parentId);
-            categoryTitle.innerText = "Tüm Ürünler";
-        } else {
-            if (activeCatObj.parentId) {
-                // It is a subcategory. Show siblings.
-                parentCat = allCategories.find(c => c.id === activeCatObj.parentId);
-                displayCats = allCategories.filter(c => c.parentId === activeCatObj.parentId);
-                showBackButton = true;
-                categoryTitle.innerText = activeCatName; // Display current subcat name
-            } else {
-                // It is a parent category. Show children.
-                displayCats = allCategories.filter(c => c.parentId === activeCatObj.id);
-                // If no children, maybe show itself or siblings? 
-                // If it has children, show children. If no children (like 'Çanta' in seed), show siblings at root?
-                if (displayCats.length === 0) {
-                    displayCats = allCategories.filter(c => !c.parentId); // Fallback to root if leaf node
-                } else {
-                    showBackButton = true; // "Back to All" essentially
-                }
-                categoryTitle.innerText = activeCatName;
-            }
-        }
-
-        // "Tümü" / Back Link Logic
-        const allLi = document.createElement('li');
-        const allA = document.createElement('a');
-        allA.href = "#";
-
-        if (showBackButton) {
-            if (parentCat) {
-                allA.innerText = `< ${parentCat.name} (Tümü)`;
-                allA.dataset.cat = parentCat.name;
-            } else {
-                allA.innerText = "< Tüm Kategoriler";
-                allA.dataset.cat = "all";
-            }
-        } else {
-            allA.innerText = "Tüm Kategoriler";
-            allA.dataset.cat = "all";
-            if (activeCatName === 'all') allA.classList.add('active');
-        }
-
-        allA.addEventListener('click', (e) => {
+    // Attach Search Listener Manually
+    const btn = document.getElementById('searchBtn');
+    if (btn) {
+        btn.onclick = (e) => {
             e.preventDefault();
-            const target = allA.dataset.cat;
-            activeCategoryState = target;
-            renderSidebar(target);
-            renderProducts(target);
-        });
-
-        allLi.appendChild(allA);
-        categorySidebarList.appendChild(allLi);
-
-        // Render List
-        displayCats.forEach(cat => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = "#";
-            a.innerText = cat.name;
-            if (cat.name === activeCatName) a.classList.add('active');
-
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                activeCategoryState = cat.name;
-                renderSidebar(cat.name);
-                renderProducts(cat.name);
-            });
-
-            li.appendChild(a);
-            categorySidebarList.appendChild(li);
-        });
+            doSearch();
+        }
     }
+    const inp = document.getElementById('searchInput');
+    if (inp) {
+        inp.onkeyup = (e) => {
+            if (e.key === 'Enter') doSearch();
+        }
+    }
+}
 
+/* ================= SLIDER LOGIC ================= */
+function renderSlider() {
+    const wrapper = document.getElementById('sliderWrapper');
+    const dots = document.getElementById('sliderDots');
+    if (!wrapper) return;
 
-    // --- FILTER TRIGGERS --- (Nav & Homepage Cards)
-    extraFilterTriggers.forEach(trigger => {
-        trigger.addEventListener('click', (e) => {
-            if (!trigger.dataset.category) return;
+    wrapper.innerHTML = '';
+    if (dots) dots.innerHTML = '';
 
-            e.preventDefault();
-            const category = trigger.dataset.category;
-            activeCategoryState = category;
+    window.GLOBAL_DATA.sliderImages.forEach((img, idx) => {
+        // Slide
+        const div = document.createElement('div');
+        div.className = 'slide';
+        div.innerHTML = `<img src="${img}" style="width:100%; height:100%; object-fit:cover;">`;
+        wrapper.appendChild(div);
 
-            renderSidebar(category);
-            renderProducts(category);
-
-            // Scroll to product grid if on homepage
-            const gridEl = document.getElementById('productGrid');
-            if (gridEl) {
-                gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+        // Dot
+        if (dots) {
+            const d = document.createElement('div');
+            d.className = `slider-dot ${idx === 0 ? 'active' : ''}`;
+            d.onclick = () => moveSlider(idx);
+            dots.appendChild(d);
+        }
     });
 
-    // --- SLIDER LOGIC ---
-    const sliderWrapper = document.getElementById('sliderWrapper');
-    const sliderDots = document.getElementById('sliderDots');
-    let sliderInterval;
+    // Reset
+    window.GLOBAL_DATA.sliderIndex = 0;
+    updateSliderUI();
+    startAutoSlide();
 
-    function initSlider() {
-        if (!sliderWrapper) return;
+    // Attach Buttons
+    const prev = document.querySelector('.slider-prev');
+    const next = document.querySelector('.slider-next');
+    if (prev) prev.onclick = (e) => { e.preventDefault(); changeSlide(-1); };
+    if (next) next.onclick = (e) => { e.preventDefault(); changeSlide(1); };
+}
 
-        let images = JSON.parse(localStorage.getItem('sliderImages')) || [];
-        if (images.length === 0) {
-            images = [
-                'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
-                'https://images.unsplash.com/photo-1456735190827-d1261f7add50?auto=format&fit=crop&w=1200&q=80',
-                'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80'
-            ];
-        }
+window.changeSlide = function (dir) {
+    let newIdx = window.GLOBAL_DATA.sliderIndex + dir;
+    const total = window.GLOBAL_DATA.sliderImages.length;
 
-        sliderWrapper.innerHTML = '';
-        if (sliderDots) sliderDots.innerHTML = '';
+    if (newIdx >= total) newIdx = 0;
+    if (newIdx < 0) newIdx = total - 1;
 
-        images.forEach((img, index) => {
-            // Slide
-            const slide = document.createElement('div');
-            slide.className = 'slide';
-            slide.innerHTML = `<img src="${img}" alt="Slide ${index + 1}">`;
-            sliderWrapper.appendChild(slide);
+    moveSlider(newIdx);
+    resetAutoSlide();
+}
 
-            // Dot
-            if (sliderDots) {
-                const dot = document.createElement('div');
-                dot.className = `slider-dot ${index === 0 ? 'active' : ''}`;
-                dot.addEventListener('click', () => goToSlide(index));
-                sliderDots.appendChild(dot);
+function moveSlider(idx) {
+    window.GLOBAL_DATA.sliderIndex = idx;
+    updateSliderUI();
+}
+
+function updateSliderUI() {
+    const wrapper = document.getElementById('sliderWrapper');
+    if (wrapper) {
+        wrapper.style.transform = `translateX(-${window.GLOBAL_DATA.sliderIndex * 100}%)`;
+    }
+
+    const dots = document.querySelectorAll('.slider-dot');
+    dots.forEach((d, i) => {
+        if (i === window.GLOBAL_DATA.sliderIndex) d.classList.add('active');
+        else d.classList.remove('active');
+    });
+}
+
+function startAutoSlide() {
+    if (window.GLOBAL_DATA.sliderInterval) clearInterval(window.GLOBAL_DATA.sliderInterval);
+    window.GLOBAL_DATA.sliderInterval = setInterval(() => {
+        changeSlide(1);
+    }, 5000);
+}
+
+function resetAutoSlide() {
+    clearInterval(window.GLOBAL_DATA.sliderInterval);
+    startAutoSlide();
+}
+
+
+/* ================= SEARCH LOGIC ================= */
+window.doSearch = function () {
+    const inp = document.getElementById('searchInput');
+    if (!inp) return;
+
+    const query = inp.value.trim().toLowerCase();
+
+    // Always render ALL with query
+    renderProducts('all', query);
+
+    // Scroll
+    const grid = document.getElementById('productGrid');
+    if (grid) {
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+
+/* ================= CAROUSEL LOGIC ================= */
+function renderCarousel() {
+    const c = document.getElementById('productCarousel');
+    if (!c) return;
+
+    const prods = window.GLOBAL_DATA.products.filter(p => p.isShowcase);
+    const displayProds = prods.length > 0 ? prods : window.GLOBAL_DATA.products.slice(0, 10);
+
+    c.innerHTML = '';
+    displayProds.forEach(p => {
+        const item = createProductCard(p);
+        c.appendChild(item);
+    });
+}
+
+
+/* ================= PRODUCT GRID LOGIC ================= */
+function renderProducts(catFilter, query = '') {
+    const grid = document.getElementById('productGrid');
+    const title = document.getElementById('categoryTitle');
+    const count = document.getElementById('resultCount');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    let list = window.GLOBAL_DATA.products;
+
+    // 1. Filter by Search Query (Priority)
+    if (query) {
+        if (title) title.innerText = `Arama: "${query}"`;
+        list = list.filter(p =>
+            p.name.toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query)
+        );
+    }
+    // 2. Filter by Category
+    else if (catFilter !== 'all') {
+        if (title) title.innerText = catFilter;
+        // Simple logic: Exact Match OR Child Category
+        list = list.filter(p => {
+            if (p.category === catFilter) return true;
+            // Check if catFilter is a Parent
+            const parent = window.GLOBAL_DATA.categories.find(c => c.name === catFilter);
+            if (parent) {
+                const children = window.GLOBAL_DATA.categories.filter(c => c.parentId === parent.id).map(c => c.name);
+                if (children.includes(p.category)) return true;
             }
+            return false;
         });
-
-        // Controls
-        const prevBtn = document.querySelector('.slider-prev');
-        const nextBtn = document.querySelector('.slider-next');
-
-        if (prevBtn) prevBtn.replaceWith(prevBtn.cloneNode(true)); // remove old listeners
-        if (nextBtn) nextBtn.replaceWith(nextBtn.cloneNode(true));
-
-        const newPrev = document.querySelector('.slider-prev');
-        const newNext = document.querySelector('.slider-next');
-
-        if (newPrev) newPrev.addEventListener('click', () => nextSlide(-1));
-        if (newNext) newNext.addEventListener('click', () => nextSlide(1));
-
-        startAutoSlide();
+    } else {
+        if (title) title.innerText = 'Tüm Ürünler';
     }
 
-    let currentSlide = 0;
+    // Render
+    if (count) count.innerText = `${list.length} ürün listelendi`;
 
-    function goToSlide(index) {
-        const slides = document.querySelectorAll('.slide');
-        const dots = document.querySelectorAll('.slider-dot');
-        if (slides.length === 0) return;
-
-        if (index >= slides.length) currentSlide = 0;
-        else if (index < 0) currentSlide = slides.length - 1;
-        else currentSlide = index;
-
-        if (sliderWrapper) sliderWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-        dots.forEach(d => d.classList.remove('active'));
-        if (dots[currentSlide]) dots[currentSlide].classList.add('active');
-
-        resetAutoSlide();
+    if (list.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem;">Ürün bulunamadı.</div>`;
+        return;
     }
 
-    function nextSlide(direction = 1) {
-        goToSlide(currentSlide + direction);
-    }
+    list.forEach(p => {
+        grid.appendChild(createProductCard(p));
+    });
+}
 
-    function startAutoSlide() {
-        if (sliderInterval) clearInterval(sliderInterval);
-        sliderInterval = setInterval(() => nextSlide(1), 5000);
-    }
+function createProductCard(p) {
+    const div = document.createElement('div');
+    div.className = 'product-card';
+    div.innerHTML = `
+        <div class="product-img-wrapper">
+            <img src="${p.image}" onerror="this.src='https://placehold.co/600x600?text=Yok'">
+             <div class="product-actions">
+                <div class="action-btn"><i class="fa-solid fa-eye"></i></div>
+            </div>
+        </div>
+        <div class="product-info">
+            <div class="product-cat">${p.category}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <div class="product-price">${parseFloat(p.price).toFixed(2)} TL</div>
+        </div>
+    `;
+    return div;
+}
 
-    function resetAutoSlide() {
-        clearInterval(sliderInterval);
-        startAutoSlide();
-    }
 
-    // --- CAROUSEL LOGIC ---
-    function initCarousel() {
-        const carousel = document.getElementById('productCarousel');
-        if (!carousel) return;
+/* ================= SIDEBAR LOGIC ================= */
+function renderSidebar(active) {
+    const list = document.getElementById('categorySidebarList');
+    if (!list) return;
+    list.innerHTML = '';
 
-        const products = JSON.parse(localStorage.getItem('products')) || [];
+    // All
+    const allLi = document.createElement('li');
+    allLi.innerHTML = `<a href="#" class="${active === 'all' ? 'active' : ''}">Tüm Kategoriler</a>`;
+    allLi.onclick = (e) => { e.preventDefault(); renderProducts('all'); renderSidebar('all'); };
+    list.appendChild(allLi);
 
-        // Filter by Showcase, fallback to first 10 if none elected
-        let showcaseProducts = products.filter(p => p.isShowcase);
-        if (showcaseProducts.length === 0) {
-            showcaseProducts = products.slice(0, 10);
+    // Parents
+    const parents = window.GLOBAL_DATA.categories.filter(c => !c.parentId);
+    parents.forEach(p => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="#" class="${active === p.name ? 'active' : ''}">${p.name}</a>`;
+
+        li.onclick = (e) => {
+            e.preventDefault();
+            renderProducts(p.name);
+            renderSidebar(p.name);
+        };
+
+        // If Active, show children
+        if (active === p.name) {
+            const kids = window.GLOBAL_DATA.categories.filter(c => c.parentId === p.id);
+            if (kids.length > 0) {
+                const ul = document.createElement('ul');
+                ul.style.paddingLeft = '15px';
+                kids.forEach(k => {
+                    const kli = document.createElement('li');
+                    kli.innerHTML = `<a href="#" style="font-size:0.9rem; color:#666">- ${k.name}</a>`;
+                    kli.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation(); // Don't trigger parent click
+                        renderProducts(k.name);
+                        // Optional: make this active?
+                    }
+                    ul.appendChild(kli);
+                });
+                li.appendChild(ul);
+            }
         }
 
-        carousel.innerHTML = '';
-        showcaseProducts.forEach(product => {
-            const card = document.createElement('div');
-            card.className = 'product-card'; // Or 'carousel-item' depending on your CSS
-
-            card.innerHTML = `
-                <div class="product-img-wrapper">
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/600x600/f1f2f6/2d3436?text=Resim+Yok'">
-                    <div class="product-actions">
-                        <div class="action-btn" title="İncele"><i class="fa-solid fa-eye"></i></div>
-                    </div>
-                </div>
-                <div class="product-info">
-                    <div class="product-cat">${product.category}</div>
-                    <h3 class="product-name">${product.name}</h3>
-                    <div class="product-price">${formatCurrency(product.price)}</div>
-                </div>
-            `;
-            carousel.appendChild(card);
-        });
-        // You might need to initialize a carousel library here (e.g., Swiper, Owl Carousel)
-        // For example: new Swiper('#productCarousel', { /* options */ });
-    }
-
-    // --- RENDER PRODUCTS ---
-    function renderProducts(categoryName, searchQuery = '') {
-        if (!grid) return;
-        grid.innerHTML = '';
-
-        let currentProducts = JSON.parse(localStorage.getItem('products')) || [];
-
-        // Apply Search Filter First
-        if (searchQuery) {
-            currentProducts = currentProducts.filter(p =>
-                p.name.toLowerCase().includes(searchQuery) ||
-                p.category.toLowerCase().includes(searchQuery)
-            );
-        }
-
-        // Logic for "categoryName":
-        // Refined: If 'all', show all.
-        // If Parent selected, show all items belonging to it + its children.
-        // If Child selected, show items matching exactly.
-
-        const filtered = categoryName === 'all'
-            ? currentProducts
-            : currentProducts.filter(p => {
-                // 1. Direct Match
-                if (p.category === categoryName) return true;
-
-                // 2. Parent Context Match
-                const contextCat = allCategories.find(c => c.name === categoryName);
-                if (contextCat) {
-                    // If this context category is a PARENT, we should include its CHILDREN products too
-                    // Find children IDs
-                    const childrenIds = allCategories.filter(c => c.parentId === contextCat.id).map(c => c.name);
-                    if (childrenIds.includes(p.category)) return true;
-                }
-
-                return false;
-            });
-
-        if (resultCount) resultCount.innerText = `${filtered.length} ürün listelendi`;
-
-        if (filtered.length === 0) {
-            grid.innerHTML = '<p style="color: var(--text-light); grid-column: 1/-1; text-align: center; font-size: 1.2rem; padding: 2rem;">Ürün bulunamadı.</p>';
-            return;
-        }
-
-        filtered.forEach(product => {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-
-            card.innerHTML = `
-                <div class="product-img-wrapper">
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://placehold.co/600x600/f1f2f6/2d3436?text=Resim+Yok'">
-                    <div class="product-actions">
-                        <div class="action-btn" title="İncele"><i class="fa-solid fa-eye"></i></div>
-                    </div>
-                </div>
-                <div class="product-info">
-                    <div class="product-cat">${product.category}</div>
-                    <h3 class="product-name">${product.name}</h3>
-                    <div class="product-price">${formatCurrency(product.price)}</div>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-
-    // --- UTILS ---
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount);
-    }
-});
+        list.appendChild(li);
+    });
+}
