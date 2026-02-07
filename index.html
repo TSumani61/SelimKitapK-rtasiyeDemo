@@ -9,63 +9,77 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style -->
     <link rel="stylesheet" href="style.css">
+    <!-- Modern Updates -->
+    <link rel="stylesheet" href="modern-updates.css">
 </head>
 
 <body>
 
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="top-info">
-                <span><i class="fa-solid fa-phone"></i> 0539 346 61 86 / 0462 746 20 04</span>
-                <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
-            </div>
-            <div class="top-socials">
-                <span>Bizi Takip Edin:</span>
-                <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
-                        class="fa-brands fa-instagram"></i></a>
-                <a href="https://wa.me/905393466186" target="_blank" style="margin-left: 10px;"><i
-                        class="fa-brands fa-whatsapp"></i></a>
-            </div>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-content">
+            <div class="logo-ellipse loader-logo">selim</div>
+            <div class="logo-sub">Kitap & Kırtasiye</div>
+            <div class="loader-spinner"></div>
         </div>
     </div>
+
+    <!-- Top Bar Removed for Modern Clean Look -->
 
     <!-- Main Header & Nav -->
     <header>
         <div class="container header-content">
             <a href="index.html" class="brand-logo">
-                <div class="logo-ellipse">selim</div>
-                <div class="logo-sub">Kitap & Kırtasiye</div>
+                <div class="logo-badge">S</div>
+                <div class="logo-text-col">
+                    <span class="logo-main-text">selim</span>
+                    <span class="logo-sub-text">KİTAP & KIRTASİYE</span>
+                </div>
             </a>
 
-            <nav>
-                <ul class="nav-list">
-                    <li><a href="index.html" class="filter-trigger active" data-category="all">Anasayfa</a></li>
-                    <li><a href="duyurular.html">Duyurular</a></li>
-                    <li><a href="contact.html">İletişim</a></li>
-                </ul>
-            </nav>
+            <ul class="nav-list" id="desktopNav">
+                <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Anasayfa</a></li>
+                <li><a href="duyurular.html"><i class="fa-solid fa-bullhorn"></i> Duyurular</a></li>
+                <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> İletişim</a></li>
+            </ul>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+
 
             <!-- Optional: Right side element like a contact button or social icon -->
-            <div class="header-right" style="display: flex; gap: 1rem;">
+            <div class="header-right desktop-only" style="display: flex; gap: 1rem; align-items: center;">
+                <button id="darkModeToggle" class="btn btn-icon">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
                 <a href="contact.html" class="btn btn-small" style="padding: 0.5rem 1.2rem; font-size: 0.8rem;">Bize
                     Ulaşın</a>
             </div>
         </div>
     </header>
 
-    <!-- Search Section -->
-    <section class="search-section">
-        <div class="container">
-            <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="Ürün ara... (ör. Kalem, Defter)">
-                <button id="searchBtn"><i class="fa-solid fa-search"></i></button>
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-header">
+                <span class="mobile-brand">selim</span>
+                <button class="close-mobile-nav" id="closeMobileNav"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <ul class="mobile-nav-list">
+                <li><a href="index.html" onclick="toggleMobileMenu()">Anasayfa</a></li>
+                <li><a href="duyurular.html" onclick="toggleMobileMenu()">Duyurular</a></li>
+                <li><a href="contact.html" onclick="toggleMobileMenu()">İletişim</a></li>
+            </ul>
         </div>
-    </section>
+    </div>
+
+    <!-- Search Section -->
+
 
     <!-- Main Slider Section -->
-    <section class="slider-section">
+    <section class="slider-section reveal-on-scroll">
         <div class="container">
             <div class="main-slider" id="mainSlider">
                 <div class="slider-wrapper" id="sliderWrapper">
@@ -78,8 +92,18 @@
         </div>
     </section>
 
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Ürün ara... (ör. Kalem, Defter)">
+                <button id="searchBtn"><i class="fa-solid fa-search"></i></button>
+            </div>
+        </div>
+    </section>
+
     <!-- Product Carousel Section -->
-    <section class="carousel-section">
+    <section class="carousel-section reveal-on-scroll">
         <div class="container">
             <div class="section-title">
                 <h2>Vitrin</h2>
@@ -95,8 +119,20 @@
         </div>
     </section>
 
+    <!-- Parallax Banner -->
+    <section class="parallax-section reveal-on-scroll">
+        <div class="parallax-overlay">
+            <div class="container" style="text-align: center; color: #fff;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Hayallerini
+                    Kağıda Dök</h2>
+                <p style="font-size: 1.2rem; opacity: 0.9;">En kaliteli kırtasiye ürünleri ile yaratıcılığını keşfet.
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- Products Section -->
-    <section class="products-section">
+    <section class="products-section reveal-on-scroll">
         <div class="container">
             <div class="product-layout-wrapper">
                 <!-- Left Sidebar -->
@@ -133,9 +169,12 @@
         <div class="container">
             <div class="footer-top">
                 <div class="footer-col">
-                    <a href="#" class="brand-logo" style="align-items: flex-start; margin-bottom: 1rem;">
-                        <div class="logo-ellipse" style="font-size: 1.5rem; padding: 5px 20px;">selim</div>
-                        <div class="logo-sub" style="color: #b2bec3;">Kitap & Kırtasiye</div>
+                    <a href="#" class="brand-logo footer-logo">
+                        <div class="logo-badge">S</div>
+                        <div class="logo-text-col">
+                            <span class="logo-main-text">selim</span>
+                            <span class="logo-sub-text">KİTAP & KIRTASİYE</span>
+                        </div>
                     </a>
                     <p>2010 yılından beri en kaliteli kırtasiye ürünlerini sizlerle buluşturuyoruz. Müşteri memnuniyeti
                         bizim önceliğimizdir.</p>

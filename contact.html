@@ -9,48 +9,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style -->
     <link rel="stylesheet" href="style.css">
+    <!-- Modern Updates -->
+    <link rel="stylesheet" href="modern-updates.css">
 </head>
 
 <body>
 
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="top-info">
-                <span><i class="fa-solid fa-phone"></i> 0539 346 61 86 / 0462 746 20 04</span>
-                <span><i class="fa-solid fa-envelope"></i> bilgi@selimkitapkirtasiye.com</span>
-            </div>
-            <div class="top-socials">
-                <span>Bizi Takip Edin:</span>
-                <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank"><i
-                        class="fa-brands fa-instagram"></i></a>
-                <a href="https://wa.me/905393466186" target="_blank" style="margin-left: 10px;"><i
-                        class="fa-brands fa-whatsapp"></i></a>
-            </div>
-        </div>
-    </div>
+    <!-- Top Bar Removed -->
 
     <!-- Main Header & Nav -->
+    <!-- Main Header -->
     <header>
         <div class="container header-content">
             <a href="index.html" class="brand-logo">
-                <div class="logo-ellipse">selim</div>
-                <div class="logo-sub">Kitap & Kırtasiye</div>
+                <div class="logo-text-col">
+                    <span class="logo-main-text">selim</span>
+                    <span class="logo-sub-text">KİTAP & KIRTASİYE</span>
+                </div>
             </a>
 
-            <nav>
-                <ul class="nav-list">
-                    <li><a href="index.html" class="filter-trigger" data-category="all">Anasayfa</a></li>
-                    <li><a href="duyurular.html">Duyurular</a></li>
-                    <li><a href="contact.html" class="active">İletişim</a></li>
-                </ul>
-            </nav>
+            <ul class="nav-list" id="desktopNav">
+                <li><a href="index.html"><i class="fa-solid fa-house"></i> Anasayfa</a></li>
+                <li><a href="duyurular.html"><i class="fa-solid fa-bullhorn"></i> Duyurular</a></li>
+                <li><a href="contact.html" class="active"><i class="fa-solid fa-envelope"></i> İletişim</a></li>
+            </ul>
 
-            <div class="header-right" style="display: flex; gap: 1rem;">
-                <!-- Right elements if any -->
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+
+            <div class="header-right desktop-only" style="display: flex; gap: 1rem; align-items: center;">
+                <button id="darkModeToggle" class="btn btn-icon">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-header">
+                <span class="mobile-brand">selim</span>
+                <button class="close-mobile-nav" id="closeMobileNav"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <ul class="mobile-nav-list">
+                <li><a href="index.html" onclick="toggleMobileMenu()">Anasayfa</a></li>
+                <li><a href="duyurular.html" onclick="toggleMobileMenu()">Duyurular</a></li>
+                <li><a href="contact.html" onclick="toggleMobileMenu()">İletişim</a></li>
+            </ul>
+        </div>
+    </div>
 
     <!-- Page Header -->
     <div style="background: var(--dark); color: var(--white); padding: 3rem 0; text-align: center;">
@@ -116,13 +126,45 @@
     </section>
 
     <!-- Footer -->
+    <!-- Modern Compact Footer -->
     <footer>
         <div class="container">
-            <div class="footer-bottom">
-                &copy; 2026 Selim Kitap Kırtasiye. Tüm hakları saklıdır.
+            <!-- Left: Brand -->
+            <div class="footer-brand-side">
+                <a href="#" class="footer-logo-small">
+                    selim <span style="font-weight:300; font-size:0.9rem; opacity:0.6;">Kitap & Kırtasiye</span>
+                </a>
+                <span class="footer-copy">&copy; 2026 Tüm hakları saklıdır.</span>
+            </div>
+
+            <!-- Middle: Socials -->
+            <div class="footer-social-side">
+                <a href="https://www.instagram.com/selimkirtasiyesurmene/" target="_blank" class="social-pill"
+                    title="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://wa.me/905393466186" target="_blank" class="social-pill" title="WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
+            </div>
+
+            <!-- Right: Contact Mini -->
+            <div class="footer-contact-side">
+                <a href="contact.html" class="contact-mini-item">
+                    <i class="fa-solid fa-location-dot"></i> Sürmene, Trabzon
+                </a>
+                <a href="tel:+905393466186" class="contact-mini-item">
+                    <i class="fa-solid fa-phone"></i> 0539 346 61 86
+                </a>
             </div>
         </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="main.js"></script>
 
 </body>
 

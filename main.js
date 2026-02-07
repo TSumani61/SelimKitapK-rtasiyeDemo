@@ -13,6 +13,11 @@ window.GLOBAL_DATA = {
 document.addEventListener('DOMContentLoaded', () => {
     initData().then(() => {
         initApp();
+        // Hide Preloader
+        setTimeout(() => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) preloader.classList.add('loaded');
+        }, 500); // Small delay for effect
     });
 });
 
@@ -40,8 +45,12 @@ function initApp() {
     renderProducts('all');
     renderSlider();
     renderCarousel();
+    renderCarousel();
+    initCarouselListeners();
     renderFooterCategories();
     initModalListeners();
+    applySiteSettings();
+    initScrollAnimations();
 
     // Attach Search Listener Manually
     const btn = document.getElementById('searchBtn');
@@ -57,6 +66,74 @@ function initApp() {
             if (e.key === 'Enter') doSearch();
         }
     }
+
+    // Mobile Menu Listeners
+    const mobToggle = document.getElementById('mobileMenuToggle');
+    const mobOverlay = document.getElementById('mobileNavOverlay');
+    const closeMob = document.getElementById('closeMobileNav');
+
+    if (mobToggle && mobOverlay) {
+        mobToggle.onclick = () => mobOverlay.classList.add('active');
+    }
+    if (closeMob && mobOverlay) {
+        closeMob.onclick = () => mobOverlay.classList.remove('active');
+    }
+
+    // Close on outside click
+    if (mobOverlay) {
+        mobOverlay.onclick = (e) => {
+            if (e.target === mobOverlay) mobOverlay.classList.remove('active');
+        }
+    }
+
+    // --- DARK MODE TOGGLE ---
+    const darkModeBtn = document.getElementById('darkModeToggle');
+    if (darkModeBtn) {
+        // Check saved
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            darkModeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        }
+
+        darkModeBtn.onclick = () => {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                darkModeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                darkModeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+        }
+    }
+}
+
+
+// Global scope for HTML onclicks
+window.toggleMobileMenu = function () {
+    const mobOverlay = document.getElementById('mobileNavOverlay');
+    if (mobOverlay) mobOverlay.classList.toggle('active');
+}
+
+// --- Scroll Animation Observer ---
+const observerOptions = {
+    threshold: 0.15, // Trigger when 15% visible
+    rootMargin: "0px 0px -50px 0px"
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // Reveal only once
+        }
+    });
+}, observerOptions);
+
+function initScrollAnimations() {
+    const elements = document.querySelectorAll('.reveal-on-scroll');
+    elements.forEach(el => observer.observe(el));
 }
 
 /* ================= SLIDER LOGIC ================= */
@@ -69,9 +146,12 @@ function renderSlider() {
     if (dots) dots.innerHTML = '';
 
     if (window.GLOBAL_DATA.sliderImages.length === 0) {
-        // Fallback or empty state
-        wrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;">Görsel Yok</div>';
-        return;
+        // Use High Quality Fallbacks
+        window.GLOBAL_DATA.sliderImages = [
+            'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&q=80&w=1600', // Stationery vibe
+            'https://images.unsplash.com/photo-1456735190827-d1261f7add50?auto=format&fit=crop&q=80&w=1600', // Writing
+            'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=1600'  // Notebooks
+        ];
     }
 
     window.GLOBAL_DATA.sliderImages.forEach((img, idx) => {
@@ -172,28 +252,63 @@ function renderCarousel() {
 
     const prods = window.GLOBAL_DATA.products.filter(p => p.isShowcase);
     // If no showcase, maybe show latest?
-    const displayProds = prods.length > 0 ? prods : window.GLOBAL_DATA.products.slice(0, 10);
+    const displayProds = prods.length > 0 ? prods : window.GLOBAL_DATA.products;
 
     c.innerHTML = '';
+
+    if (displayProds.length === 0) {
+        c.innerHTML = '<div style="padding:20px; color:#888;">Gösterilecek ürün yok.</div>';
+        return;
+    }
+
     displayProds.forEach(p => {
         const item = createProductCard(p);
+        item.classList.add('carousel-item');
         c.appendChild(item);
     });
 }
 
+function initCarouselListeners() {
+    const prev = document.querySelector('.carousel-btn.prev');
+    const next = document.querySelector('.carousel-btn.next');
+    const carousel = document.getElementById('productCarousel');
+
+    if (prev && carousel) {
+        prev.onclick = () => {
+            carousel.scrollBy({ left: -300, behavior: 'smooth' });
+        };
+    }
+    if (next && carousel) {
+        next.onclick = () => {
+            carousel.scrollBy({ left: 300, behavior: 'smooth' });
+        };
+    }
+}
+
 
 /* ================= PRODUCT GRID LOGIC ================= */
+/* ================= PRODUCT GRID LOGIC ================= */
+let currentProductList = []; // Filtered list
+let currentVisibleCount = 0; // How many currently shown
+const PAGE_SIZE = 12; // Products per load
+
 function renderProducts(catFilter, query = '') {
     const grid = document.getElementById('productGrid');
     const title = document.getElementById('categoryTitle');
     const count = document.getElementById('resultCount');
     if (!grid) return;
 
+    // Reset layout if it's a new filter/search
+    // We detect "new operation" by checking if we are appending or starting fresh.
+    // For simplicity, let's assume any call to renderProducts is a "reset" unless specified internally.
+    // Actually, we'll split logic: prepare list, then render chunks.
+
     grid.innerHTML = '';
+    currentVisibleCount = 0;
 
     let list = window.GLOBAL_DATA.products;
 
-    // 1. Filter by Search Query (Priority)
+    // 1. Filter by Search Query
     if (query) {
         if (title) title.innerText = `Arama: "${query}"`;
         list = list.filter(p =>
@@ -204,10 +319,8 @@ function renderProducts(catFilter, query = '') {
     // 2. Filter by Category
     else if (catFilter !== 'all') {
         if (title) title.innerText = catFilter;
-        // Simple logic: Exact Match OR Child Category
         list = list.filter(p => {
             if (p.category === catFilter) return true;
-            // Check if catFilter is a Parent
             const parent = window.GLOBAL_DATA.categories.find(c => c.name === catFilter);
             if (parent) {
                 const children = window.GLOBAL_DATA.categories.filter(c => c.parentId === parent.id).map(c => c.name);
@@ -219,24 +332,82 @@ function renderProducts(catFilter, query = '') {
         if (title) title.innerText = 'Tüm Ürünler';
     }
 
-    // Render
+    currentProductList = list;
+
+    // Update Count Text
     if (count) count.innerText = `${list.length} ürün listelendi`;
 
     if (list.length === 0) {
         grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem;">Ürün bulunamadı.</div>`;
+        removeLoadMoreBtn();
         return;
     }
 
-    list.forEach(p => {
+    // Initial Load
+    loadMoreProducts();
+}
+
+function loadMoreProducts() {
+    const grid = document.getElementById('productGrid');
+    if (!grid) return;
+
+    // Determine range
+    const start = currentVisibleCount;
+    const end = Math.min(start + PAGE_SIZE, currentProductList.length);
+
+    const chunk = currentProductList.slice(start, end);
+
+    chunk.forEach(p => {
         grid.appendChild(createProductCard(p));
     });
+
+    currentVisibleCount = end;
+
+    // Check if we need "Load More" button
+    updateLoadMoreBtn();
+}
+
+function updateLoadMoreBtn() {
+    removeLoadMoreBtn();
+
+    // If there are still items to show
+    if (currentVisibleCount < currentProductList.length) {
+        const btnContainer = document.createElement('div');
+        btnContainer.id = 'loadMoreContainer';
+        btnContainer.style.width = '100%';
+        btnContainer.style.textAlign = 'center';
+        btnContainer.style.gridColumn = '1 / -1'; // Span full width in grid
+        btnContainer.style.marginTop = '2rem';
+
+        const btn = document.createElement('button');
+        btn.innerText = 'Daha Fazla Göster';
+        btn.className = 'btn btn-outline'; // Reusing existing style
+        btn.onclick = () => {
+            loadMoreProducts();
+        };
+
+        btnContainer.appendChild(btn);
+
+        // Append to grid (or after grid? Grid is better if we use full span)
+        const grid = document.getElementById('productGrid');
+        grid.appendChild(btnContainer);
+    }
+}
+
+function removeLoadMoreBtn() {
+    const existing = document.getElementById('loadMoreContainer');
+    if (existing) existing.remove();
 }
 
 function createProductCard(p) {
     const div = document.createElement('div');
-    div.className = 'product-card';
+    // Check Stock
+    const isOutOfStock = (p.inStock === false); // explicit false check, default true
+
+    div.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''}`;
     div.innerHTML = `
         <div class="product-img-wrapper">
+            ${isOutOfStock ? '<div class="out-of-stock-badge">TÜKENDİ</div>' : ''}
             <img src="${p.image}" onerror="this.src='https://placehold.co/600x600?text=Yok'">
              <div class="product-actions">
                 <div class="action-btn" title="İncele"><i class="fa-solid fa-eye"></i></div>
@@ -253,6 +424,57 @@ function createProductCard(p) {
     return div;
 }
 
+/* ================= SITE SETTINGS LOGIC ================= */
+async function applySiteSettings() {
+    try {
+        const doc = await db.collection('settings').doc('general').get();
+        if (!doc.exists) return;
+
+        const data = doc.data();
+
+        // 1. Theme Color
+        if (data.themeColor) {
+            document.documentElement.style.setProperty('--primary', data.themeColor);
+        }
+
+        // 2. Footer & Top Bar Color
+        if (data.footerColor) {
+            document.documentElement.style.setProperty('--footer-bg', data.footerColor);
+        }
+
+        // 3. Announcement Bar
+        // 3. Announcement Bar (Modern Toast Style)
+        if (data.showAnnouncement && data.announcementText) {
+            // Check session storage to see if closed previously (optional, let's keep it simple for now or use session)
+            if (!sessionStorage.getItem('announcementClosed')) {
+                const bar = document.createElement('div');
+                bar.className = 'announcement-bar';
+
+                const textSpan = document.createElement('div');
+                textSpan.className = 'announcement-text';
+                textSpan.innerHTML = `<i class="fa-solid fa-bullhorn" style="margin-right:8px;"></i> ${data.announcementText}`;
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'ann-close-btn';
+                closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                closeBtn.onclick = () => {
+                    bar.style.display = 'none';
+                    sessionStorage.setItem('announcementClosed', 'true');
+                };
+
+                bar.appendChild(textSpan);
+                bar.appendChild(closeBtn);
+
+                // Insert at top of body
+                document.body.prepend(bar);
+            }
+        }
+
+    } catch (error) {
+        console.error("Settings load error:", error);
+    }
+}
+
 /* ================= MODAL LOGIC ================= */
 window.openModal = function (id) {
     const p = window.GLOBAL_DATA.products.find(x => x.id == id);
@@ -267,6 +489,27 @@ window.openModal = function (id) {
     document.getElementById('modalTitle').innerText = p.name;
     document.getElementById('modalPrice').innerText = `${parseFloat(p.price).toFixed(2)} TL`;
     document.getElementById('modalDesc').innerText = p.description || 'Bu ürün için henüz açıklama girilmemiş.';
+
+    // Reset any stock warning
+    const stockMsg = document.getElementById('modalStockMsg');
+    if (stockMsg) stockMsg.remove();
+
+    // Check Stock
+    if (p.inStock === false) {
+        const infoDiv = modal.querySelector('.modal-info');
+        const warning = document.createElement('div');
+        warning.id = 'modalStockMsg';
+        warning.className = 'badge';
+        warning.style.backgroundColor = '#636e72';
+        warning.style.color = '#fff';
+        warning.style.marginTop = '10px';
+        warning.style.display = 'inline-block';
+        warning.innerText = 'Bu ürün şu an stoklarımızda bulunmamaktadır.';
+
+        // Insert after price
+        const priceEl = document.getElementById('modalPrice');
+        priceEl.parentNode.insertBefore(warning, priceEl.nextSibling);
+    }
 
     modal.style.display = 'flex';
 }

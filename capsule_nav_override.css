@@ -1,0 +1,82 @@
+/* =========================================
+   MODERN CAPSULE NAV & GLASS HEADER OVERRIDE
+   ========================================= */
+
+/* Glass Header Container */
+header {
+    background: rgba(255, 255, 255, 0.9) !important;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.05) !important;
+    padding: 0 !important;
+}
+
+.header-content {
+    height: 100%;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Hide the old line effect */
+.nav-list a::after {
+    display: none !important;
+}
+
+/* Nav List Container (The Grey Capsule) */
+.nav-list {
+    display: flex !important;
+    gap: 0.5rem !important;
+    list-style: none;
+    margin: 0 !important;
+    background: var(--light) !important;
+    padding: 5px 6px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    align-items: center;
+}
+
+/* Nav Link Items (The Pills) */
+.nav-list a {
+    text-decoration: none !important;
+    color: var(--text-light) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 40px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 8px !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    height: auto !important;
+    line-height: 1 !important;
+}
+
+/* Hover Effect */
+.nav-list a:hover {
+    color: var(--dark) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Active Pill Effect */
+.nav-list a.active {
+    background: var(--white) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    font-weight: 600 !important;
+    transform: translateY(-1px);
+}
+
+/* Icons */
+.nav-list a i {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}

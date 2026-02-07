@@ -64,6 +64,10 @@ window.switchTab = (tabName) => {
     if (tabName === 'slider') {
         loadSliderImages();
     }
+
+    if (tabName === 'settings') {
+        loadSiteSettings();
+    }
 }
 
 // --- Component Loaders ---
@@ -271,6 +275,28 @@ window.loadSliderImages = async function () {
     }
 }
 
+window.loadSiteSettings = async function () {
+    try {
+        const doc = await db.collection('settings').doc('general').get();
+        if (doc.exists) {
+            const data = doc.data();
+            if (document.getElementById('themeColor'))
+                document.getElementById('themeColor').value = data.themeColor || '#d63031';
+
+            if (document.getElementById('footerColor'))
+                document.getElementById('footerColor').value = data.footerColor || '#292f36';
+
+            if (document.getElementById('topAnnouncement'))
+                document.getElementById('topAnnouncement').value = data.announcementText || '';
+
+            if (document.getElementById('showAnnouncement'))
+                document.getElementById('showAnnouncement').checked = data.showAnnouncement || false;
+        }
+    } catch (e) {
+        console.error("Error loading settings:", e);
+    }
+}
+
 // --- Action Functions ---
 window.toggleShowcase = async (id) => {
     try {
@@ -311,6 +337,7 @@ window.editProduct = async (id) => {
         document.getElementById('pImage').value = p.image;
         if (document.getElementById('pDesc')) document.getElementById('pDesc').value = p.description || '';
         document.getElementById('pShowcase').checked = p.isShowcase || false;
+        document.getElementById('pStock').checked = (p.inStock !== undefined) ? p.inStock : true;
 
         const saveProductBtn = document.getElementById('saveProductBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -516,7 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 category: document.getElementById('pCategory').value,
                 image: document.getElementById('pImage').value,
                 description: document.getElementById('pDesc') ? document.getElementById('pDesc').value : '',
-                isShowcase: document.getElementById('pShowcase').checked
+                isShowcase: document.getElementById('pShowcase').checked,
+                inStock: document.getElementById('pStock').checked
             };
 
             const saveBtn = document.getElementById('saveProductBtn');
@@ -669,6 +697,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 changePasswordForm.reset();
             } catch (err) {
                 alert('Hata: ' + err.message);
+            }
+        });
+    }
+
+    // --- Site Settings Form ---
+    const siteSettingsForm = document.getElementById('siteSettingsForm');
+    if (siteSettingsForm) {
+        siteSettingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const themeColor = document.getElementById('themeColor').value;
+            const footerColor = document.getElementById('footerColor').value;
+            const text = document.getElementById('topAnnouncement').value;
+            const show = document.getElementById('showAnnouncement').checked;
+
+            try {
+                await db.collection('settings').doc('general').set({
+                    themeColor: themeColor,
+                    footerColor: footerColor,
+                    announcementText: text,
+                    showAnnouncement: show
+                }, { merge: true });
+                alert('Site ayarları güncellendi!');
+            } catch (e) {
+                alert('Hata: ' + e.message);
             }
         });
     }

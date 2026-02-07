@@ -1,0 +1,136 @@
+/* =========================================
+   ULTRA-COMPACT MODERN FOOTER OVERRIDE
+   ========================================= */
+
+footer {
+    background: var(--dark) !important;
+    margin-top: 4rem !important;
+    position: relative !important;
+    overflow: hidden !important;
+    padding: 2rem 0 !important;
+    /* Minimal padding */
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-image: none !important;
+    /* Remove gradient if any */
+}
+
+/* Override previous heavy/complex footer styles */
+.footer-top,
+.footer-col,
+.footer-bottom,
+.footer-logo .logo-badge {
+    display: none !important;
+}
+
+/* Flex Container */
+footer .container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 2rem !important;
+}
+
+/* 1. Left: Brand & Copy */
+.footer-brand-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-logo-small {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-copy {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+}
+
+/* 2. Middle: Social Pills */
+.footer-social-side {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-pill {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.social-pill:hover {
+    background: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(244, 63, 94, 0.4);
+    /* Glow effect */
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+/* 3. Right: Contact Compact */
+.footer-contact-side {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.contact-mini-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+.contact-mini-item:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.contact-mini-item i {
+    color: var(--secondary);
+    /* Sky Blue */
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    footer .container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .footer-contact-side {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .contact-mini-item {
+        width: 100%;
+        justify-content: center;
+    }
+}
