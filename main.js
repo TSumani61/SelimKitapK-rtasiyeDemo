@@ -32,7 +32,12 @@ async function initData() {
 
         window.GLOBAL_DATA.products = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         window.GLOBAL_DATA.categories = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        window.GLOBAL_DATA.sliderImages = sSnap.docs.map(d => d.data().url);
+
+        let sImgs = sSnap.docs.map(d => ({ ...d.data() }));
+        // Sort by order
+        sImgs.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        window.GLOBAL_DATA.sliderImages = sImgs.map(d => d.url);
 
         console.log("Data loaded:", window.GLOBAL_DATA);
     } catch (error) {

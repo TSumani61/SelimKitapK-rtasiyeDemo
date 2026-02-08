@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönetim Paneli - Selim Kitap Kırtasiye</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../images/logo.png">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style (Corrected Path) -->
@@ -185,6 +187,49 @@
             border-radius: 16px;
             text-align: center;
         }
+
+        /* Drag & Drop Upload Styles */
+        .drop-zone {
+            border: 2px dashed #ced6e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #ffffff;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--primary);
+            /* Uses root variable if available, else standard red */
+            border-color: #d63031;
+            background: #ffeaea;
+        }
+
+        .drop-zone p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+            /* Hidden by default */
+            object-fit: contain;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-hidden-file {
+            display: none;
+        }
     </style>
 </head>
 
@@ -261,8 +306,22 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Resim URL</label>
-                                <input type="url" id="pImage" class="form-input" placeholder="https://..." required>
+                                <label>Ürün Resmi</label>
+                                <!-- Drag & Drop Zone -->
+                                <div class="drop-zone" id="pDropZone">
+                                    <div id="pDropContent">
+                                        <i class="fa-solid fa-cloud-arrow-up"
+                                            style="font-size: 2rem; color: #bdc3c7; margin-bottom: 10px;"></i>
+                                        <p>Resmi buraya sürükleyin<br>veya tıklayıp seçin</p>
+                                    </div>
+                                    <img id="pPreview" class="preview-img">
+                                </div>
+                                <input type="file" id="pFile" class="input-hidden-file" accept="image/*">
+
+                                <!-- Fallback URL Input -->
+                                <input type="text" id="pImage" class="form-input"
+                                    placeholder="veya Resim URL'si yapıştırın (https://...)"
+                                    oninput="updatePreviewFromUrl(this.value, 'pPreview')">
                             </div>
                             <div class="form-group">
                                 <label>Açıklama</label>
@@ -403,16 +462,41 @@
                         <h3>Yeni Slider Görseli Ekle</h3>
                         <form id="sliderForm">
                             <div class="form-group">
-                                <label>Görsel URL</label>
-                                <input type="url" id="sliderUrl" class="form-input" placeholder="https://..." required>
+                                <label>Slider Görseli</label>
+                                <div class="drop-zone" id="sDropZone">
+                                    <div id="sDropContent">
+                                        <i class="fa-solid fa-image"
+                                            style="font-size: 2rem; color: #bdc3c7; margin-bottom: 10px;"></i>
+                                        <p>Görseli buraya sürükleyin<br>veya tıklayıp seçin</p>
+                                    </div>
+                                    <img id="sPreview" class="preview-img">
+                                </div>
+                                <input type="file" id="sFile" class="input-hidden-file" accept="image/*">
+
+                                <input type="text" id="sliderUrl" class="form-input"
+                                    placeholder="veya Görsel URL'si (https://...)"
+                                    oninput="updatePreviewFromUrl(this.value, 'sPreview')">
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ekle</button>
+                            <div style="text-align: right;">
+                                <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">Ekle</button>
+                            </div>
                         </form>
                     </div>
 
                     <!-- List Slider Images -->
                     <div class="admin-card">
-                        <h3>Mevcut Slider Görselleri</h3>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Mevcut Slider Görselleri</h3>
+                            <button id="saveSliderOrderBtn" class="btn btn-primary hidden" onclick="saveSliderOrder()"
+                                style="background-color: #2ecc71; border: none;">
+                                <i class="fa-solid fa-save"></i> Sıralamayı Kaydet
+                            </button>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
+                            <i class="fa-solid fa-info-circle"></i> Görselleri sürükleyip bırakarak sıralamayı
+                            değiştirebilirsiniz.
+                        </p>
                         <div class="category-list" id="sliderListContainer">
                             <!-- Populated by JS -->
                         </div>
@@ -459,7 +543,8 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary"
-                                style="width: 100%; margin-top: 15px;">Ayarları Kaydet</button>
+                                style="width: 100%; margin-top: 15px;">Ayarları
+                                Kaydet</button>
                         </form>
                     </div>
 

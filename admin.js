@@ -245,15 +245,83 @@ window.loadAnnouncements = async function () {
     }
 }
 
+// --- Slider Reordering Logic ---
+let dragSrcEl = null;
+
+function handleDragStart(e) {
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    this.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDragEnter(e) {
+    this.classList.add('over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (dragSrcEl !== this) {
+        // Swap DOM elements
+        // Simple swap of innerHTML is not enough because of event listeners and ID references
+        // Better to swap the elements themselves in the DOM
+
+        // This is a robust swap
+        const container = document.getElementById('sliderListContainer');
+        const items = [...container.children];
+        const srcIndex = items.indexOf(dragSrcEl);
+        const targetIndex = items.indexOf(this);
+
+        if (srcIndex < targetIndex) {
+            container.insertBefore(dragSrcEl, this.nextSibling);
+        } else {
+            container.insertBefore(dragSrcEl, this);
+        }
+
+        // Show Save Button
+        document.getElementById('saveSliderOrderBtn').classList.remove('hidden');
+    }
+
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    let items = document.querySelectorAll('#sliderListContainer .cat-list-item');
+    items.forEach(function (item) {
+        item.classList.remove('over');
+    });
+}
+
+
 window.loadSliderImages = async function () {
     const sliderListContainer = document.getElementById('sliderListContainer');
     if (!sliderListContainer) return;
 
     try {
         const snapshot = await db.collection('sliderImages').get();
-        const imagesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // {id, url}
+        let imagesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sort by 'order' field, default to 0 if not present
+        imagesData.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         sliderListContainer.innerHTML = '';
+        document.getElementById('saveSliderOrderBtn').classList.add('hidden');
 
         if (imagesData.length === 0) {
             sliderListContainer.innerHTML = '<p style="padding:1rem;">Slider görseli yok.</p>';
@@ -263,15 +331,60 @@ window.loadSliderImages = async function () {
         imagesData.forEach((item) => {
             const div = document.createElement('div');
             div.className = 'cat-list-item';
+            div.draggable = true; // Make draggable
+            div.setAttribute('data-id', item.id);
+            div.style.cursor = 'move'; // Visual cue
+
             div.innerHTML = `
-                <img src="${item.url}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 1rem;">
-                <div style="flex:1; word-break: break-all;">${item.url}</div>
-                <button onclick="deleteSliderImage('${item.id}')" class="btn btn-small" style="background: #fff; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                    <i class="fa-solid fa-grip-lines" style="color:#ccc;"></i>
+                    <img src="${item.url}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px;">
+                    <div style="flex:1; word-break: break-all; font-size:0.9rem;">${item.url.substring(0, 50)}...</div>
+                    <button onclick="deleteSliderImage('${item.id}')" class="btn btn-small" style="background: #fff; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
+                </div>
             `;
+
+            // Attach Drag Events
+            div.addEventListener('dragstart', handleDragStart, false);
+            div.addEventListener('dragenter', handleDragEnter, false);
+            div.addEventListener('dragover', handleDragOver, false);
+            div.addEventListener('dragleave', handleDragLeave, false);
+            div.addEventListener('drop', handleDrop, false);
+            div.addEventListener('dragend', handleDragEnd, false);
+
             sliderListContainer.appendChild(div);
         });
     } catch (error) {
         console.error(error);
+    }
+}
+
+window.saveSliderOrder = async () => {
+    const container = document.getElementById('sliderListContainer');
+    const items = container.querySelectorAll('.cat-list-item');
+    const btn = document.getElementById('saveSliderOrderBtn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+
+    const batch = db.batch();
+
+    items.forEach((item, index) => {
+        const id = item.getAttribute('data-id');
+        const ref = db.collection('sliderImages').doc(id);
+        batch.update(ref, { order: index });
+    });
+
+    try {
+        await batch.commit();
+        alert('Sıralama güncellendi!');
+        btn.classList.add('hidden');
+    } catch (error) {
+        console.error("Error saving order:", error);
+        alert('Sıralama kaydedilemedi: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-save"></i> Sıralamayı Kaydet';
     }
 }
 
@@ -337,7 +450,11 @@ window.editProduct = async (id) => {
         document.getElementById('pImage').value = p.image;
         if (document.getElementById('pDesc')) document.getElementById('pDesc').value = p.description || '';
         document.getElementById('pShowcase').checked = p.isShowcase || false;
+        document.getElementById('pShowcase').checked = p.isShowcase || false;
         document.getElementById('pStock').checked = (p.inStock !== undefined) ? p.inStock : true;
+
+        // Show Preview
+        window.updatePreviewFromUrl(p.image, 'pPreview');
 
         const saveProductBtn = document.getElementById('saveProductBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -449,6 +566,121 @@ window.uploadExcel = () => {
 };
 
 
+
+
+
+
+// ================= IMAGE UPLOAD UTILS =================
+
+// Resize image to max 1000px to keep base64 size manageable
+function resizeImage(file, maxWidth = 1000) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                // Compress to 0.7 quality jpeg
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(dataUrl);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+window.handleFileSelect = async (input, previewId, targetUrlInputId) => {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        try {
+            // Show loading or something?
+            const base64 = await resizeImage(file);
+            document.getElementById(targetUrlInputId).value = base64;
+
+            const preview = document.getElementById(previewId);
+            preview.src = base64;
+            preview.style.display = 'block';
+        } catch (e) {
+            console.error(e);
+            alert("Resim işlenirken hata oluştu.");
+        }
+    }
+}
+
+window.updatePreviewFromUrl = (url, previewId) => {
+    const preview = document.getElementById(previewId);
+    if (url && (url.startsWith('http') || url.startsWith('data:') || url.startsWith('images/'))) {
+        preview.src = url;
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+        preview.src = '';
+    }
+}
+
+function setupDragAndDrop(dropZoneId, fileInputId) {
+    const dropZone = document.getElementById(dropZoneId);
+    const fileInput = document.getElementById(fileInputId);
+
+    if (!dropZone || !fileInput) return;
+
+    // Click to open file dialog
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // File Input Change
+    fileInput.addEventListener('change', () => {
+        // Trigger generic handler
+        // Needs mapping to specific preview/target
+        let previewId, targetId;
+        if (fileInputId === 'pFile') { previewId = 'pPreview'; targetId = 'pImage'; }
+        else if (fileInputId === 'sFile') { previewId = 'sPreview'; targetId = 'sliderUrl'; }
+
+        handleFileSelect(fileInput, previewId, targetId);
+    });
+
+    // Drag Events
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files; // Assign dropped files to input
+
+        // Trigger change manually
+        const event = new Event('change');
+        fileInput.dispatchEvent(event);
+    }, false);
+}
+
+
 // ================= DOM CONTENT LOADED =================
 document.addEventListener('DOMContentLoaded', () => {
     const loginSection = document.getElementById('loginSection');
@@ -457,6 +689,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
 
     // --- State Initialization ---
+    setupDragAndDrop('pDropZone', 'pFile');
+    setupDragAndDrop('sDropZone', 'sFile');
+
     // NO LOCAL STORAGE MIGRATION AUTOMATICALLY TO AVOID DUPLICATES ON REFRESH
     // Check if categories empty, maybe seed?
     /*
