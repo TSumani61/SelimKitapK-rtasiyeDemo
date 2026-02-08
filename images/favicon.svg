@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180">
+  <!-- Red Ellipse -->
+  <ellipse cx="150" cy="90" rx="145" ry="85" fill="#d63031" />
+  
+  <!-- "selim" Text -->
+  <text x="150" y="105" text-anchor="middle" font-family="'Playfair Display', 'Times New Roman', serif" font-weight="bold" font-size="90" fill="#ffffff">selim</text>
+</svg>
