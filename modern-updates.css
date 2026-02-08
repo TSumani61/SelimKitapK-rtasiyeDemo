@@ -66,6 +66,28 @@
     --divider: rgba(0, 0, 0, 0.06);
 }
 
+[data-theme="dark"] {
+    --header-bg: rgba(26, 37, 47, 0.95) !important;
+    /* Dark background for header */
+    --text-main: #ecf0f1 !important;
+    --text-muted: #bdc3c7 !important;
+    --divider: rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure logo text is visible in dark mode if it was forced to dark previously */
+[data-theme="dark"] .logo-main-text {
+    color: var(--primary) !important;
+    /* Keep primary or make white? Primary is nicer. */
+}
+
+[data-theme="dark"] .logo-sub-text {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 header {
     background-color: var(--header-bg) !important;
     backdrop-filter: blur(var(--header-blur));
@@ -329,6 +351,30 @@ header {
     font-size: 1.1rem;
     line-height: 1.8;
     color: var(--text-main);
+}
+
+/* Dark Mode Overrides for Announcements */
+[data-theme="dark"] .ann-card {
+    background: var(--bg-card);
+    /* Should be dark from variables */
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .ann-content {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .ann-date {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .ann-card::before {
+    background: var(--bg-card);
+    /* Match card bg */
+    box-shadow: 0 0 0 4px var(--bg-body);
+    /* Match body bg */
 }
 
 /* --- DARK MODE TOGGLE BUTTON --- */
