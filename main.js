@@ -13,11 +13,11 @@ window.GLOBAL_DATA = {
 document.addEventListener('DOMContentLoaded', () => {
     initData().then(() => {
         initApp();
-        // Hide Preloader
+        // Hide Preloader with a slight delay to ensure styles are applied
         setTimeout(() => {
             const preloader = document.getElementById('preloader');
             if (preloader) preloader.classList.add('loaded');
-        }, 500); // Small delay for effect
+        }, 800);
     });
 });
 
@@ -31,7 +31,10 @@ async function initData() {
         ]);
 
         window.GLOBAL_DATA.products = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        window.GLOBAL_DATA.categories = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        let cImgs = cSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Sort categories by order
+        cImgs.sort((a, b) => (a.order || 0) - (b.order || 0));
+        window.GLOBAL_DATA.categories = cImgs;
 
         let sImgs = sSnap.docs.map(d => ({ ...d.data() }));
         // Sort by order
@@ -56,6 +59,7 @@ function initApp() {
     initModalListeners();
     applySiteSettings();
     initScrollAnimations();
+    renderHeaderCategories();
 
     // Attach Search Listener Manually
     const btn = document.getElementById('searchBtn');
@@ -447,32 +451,23 @@ async function applySiteSettings() {
             document.documentElement.style.setProperty('--footer-bg', data.footerColor);
         }
 
-        // 3. Announcement Bar
-        // 3. Announcement Bar (Modern Toast Style)
-        if (data.showAnnouncement && data.announcementText) {
-            // Check session storage to see if closed previously (optional, let's keep it simple for now or use session)
-            if (!sessionStorage.getItem('announcementClosed')) {
-                const bar = document.createElement('div');
-                bar.className = 'announcement-bar';
-
-                const textSpan = document.createElement('div');
-                textSpan.className = 'announcement-text';
-                textSpan.innerHTML = `<i class="fa-solid fa-bullhorn" style="margin-right:8px;"></i> ${data.announcementText}`;
-
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'ann-close-btn';
-                closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                closeBtn.onclick = () => {
-                    bar.style.display = 'none';
-                    sessionStorage.setItem('announcementClosed', 'true');
-                };
-
-                bar.appendChild(textSpan);
-                bar.appendChild(closeBtn);
-
-                // Insert at top of body
-                document.body.prepend(bar);
+        // 3. Marquee Text (Previously Announcement Bar)
+        if (data.announcementText) {
+            const marqueeContent = document.querySelector('.marquee-content');
+            if (marqueeContent) {
+                // Repeat text for seamless loop
+                const text = data.announcementText;
+                let repeatedHTML = '';
+                // 10 times is usually safe enough for varied screen widths
+                for (let i = 0; i < 15; i++) {
+                    repeatedHTML += `<span>${text}</span><span class="separator">•</span>`;
+                }
+                marqueeContent.innerHTML = repeatedHTML;
+            } else {
+                // Fallback if marquee is missing (should stick to index.html though)
             }
+
+            // Remove old announcement bar logic if it exists (not creating it anymore)
         }
 
     } catch (error) {
@@ -612,4 +607,88 @@ function renderFooterCategories() {
         li.appendChild(a);
         list.appendChild(li);
     });
+}
+
+/* --- NEW HEADER NAV LOGIC --- */
+function renderHeaderCategories() {
+    const nav = document.getElementById('catNavBar');
+    if (!nav) return;
+
+    // Clear existing
+    nav.innerHTML = '';
+
+    const categories = window.GLOBAL_DATA.categories || [];
+    const parents = categories.filter(c => !c.parentId);
+
+    if (parents.length === 0) return;
+
+    const ul = document.createElement('ul');
+    ul.className = 'cat-menu';
+
+    parents.forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'cat-item';
+
+        const children = categories.filter(c => c.parentId === p.id);
+        const hasChildren = children.length > 0;
+
+        // Parent Link
+        const a = document.createElement('a');
+        a.className = 'cat-link';
+        // Add icon if children exist
+        a.innerHTML = `${p.name} ${hasChildren ? '<i class="fa-solid fa-chevron-down" style="font-size: 0.7em; margin-left: 4px;"></i>' : ''}`;
+
+        a.onclick = (e) => {
+            e.preventDefault();
+            renderProducts(p.name);
+            scrollToProducts();
+        };
+
+        li.appendChild(a);
+
+        // Dropdown
+        if (hasChildren) {
+            const subUl = document.createElement('ul');
+            subUl.className = 'cat-dropdown';
+
+            children.forEach(child => {
+                const subLi = document.createElement('li');
+                const subA = document.createElement('a');
+                subA.className = 'cat-sub-link';
+                subA.innerText = child.name;
+                subA.href = '#';
+                subA.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    renderProducts(child.name);
+                    scrollToProducts();
+                };
+                subLi.appendChild(subA);
+                subUl.appendChild(subLi);
+            });
+            li.appendChild(subUl);
+        }
+
+        ul.appendChild(li);
+    });
+
+    nav.appendChild(ul);
+}
+
+function scrollToProducts() {
+    const section = document.querySelector('.products-section');
+    // Or closer to grid
+    const grid = document.getElementById('productGrid');
+
+    if (grid) {
+        // Scroll with offset for sticky header
+        const headerOffset = 150;
+        const elementPosition = grid.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
 }

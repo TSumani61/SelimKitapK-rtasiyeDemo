@@ -6,30 +6,7 @@
 // Initialize DB Reference
 const db = firebase.firestore();
 
-// Crypto Helper
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
-// Init Auth
-async function initAdminCredentials() {
-    try {
-        const doc = await db.collection('settings').doc('admin').get();
-        if (!doc.exists) {
-            console.log("Initializing admin credentials...");
-            const defaultHash = await sha256('GoropogluKS6134');
-            await db.collection('settings').doc('admin').set({
-                username: 'SelimKübra6134',
-                passwordHash: defaultHash
-            });
-        }
-    } catch (e) {
-        console.error("Auth Init Error:", e);
-    }
-}
 
 // ================= GLOBAL HELPERS & LOADERS =================
 
@@ -127,6 +104,7 @@ window.loadProducts = async function () {
     }
 }
 
+// --- Category Drag & Drop Logic ---
 window.loadCategories = async function () {
     const totalCategoriesCount = document.getElementById('totalCategoriesCount');
     const pCategorySelect = document.getElementById('pCategory');
@@ -138,14 +116,17 @@ window.loadCategories = async function () {
 
     try {
         const snapshot = await db.collection('categories').get();
-        const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Sort by order
+        categories.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         totalCategoriesCount.innerText = `${categories.length} Kategori`;
 
         // Separate Parents and Children
         const parents = categories.filter(c => !c.parentId);
 
-        // Populate Select Boxes
+        // Populate Select Boxes (Keep Logic)
         if (pCategorySelect) pCategorySelect.innerHTML = '';
         if (parentCategorySelect) parentCategorySelect.innerHTML = '<option value="">Yok (Ana Kategori)</option>';
         if (filterCategorySelect) filterCategorySelect.innerHTML = '<option value="all">Tüm Kategoriler</option>';
@@ -179,37 +160,123 @@ window.loadCategories = async function () {
             });
         });
 
-        // List Setup
+        // List Setup with Drag & Drop
         categoryListContainer.innerHTML = '';
+        document.getElementById('saveCategoryOrderBtn').classList.add('hidden'); // Hide save btn initially
+
         if (categories.length === 0) {
             categoryListContainer.innerHTML = '<p style="padding:1rem;">Kategori yok.</p>';
             return;
         }
 
         parents.forEach(parent => {
-            const div = document.createElement('div');
-            div.className = 'cat-list-item';
-            div.innerHTML = `
-                <span style="font-weight: 600;">${parent.name}</span>
-                <button onclick="deleteCategory('${parent.id}')" class="btn btn-small" style="background: #fff; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
-            `;
-            categoryListContainer.appendChild(div);
+            // Wrapper for Parent + Children (The draggable unit)
+            const groupDiv = document.createElement('div');
+            // Remove draggable=true, Sortable handles it
+            groupDiv.className = 'cat-group';
+            groupDiv.setAttribute('data-id', parent.id);
+            groupDiv.style.marginBottom = '10px';
+            groupDiv.style.border = '1px solid #eee';
+            groupDiv.style.borderRadius = '6px';
+            groupDiv.style.background = '#fff';
 
+            // Parent Item
+            const parentDiv = document.createElement('div');
+            parentDiv.className = 'cat-list-item';
+            parentDiv.style.border = 'none';
+            parentDiv.style.marginBottom = '0';
+            parentDiv.style.background = 'transparent';
+            // Added handle class for better UX if needed, or just let whole row be draggable
+            parentDiv.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%; cursor: grab;">
+                    <i class="fa-solid fa-grip-vertical" style="color:#aaa; cursor: grab;"></i>
+                    <span style="font-weight: 600;">${parent.name}</span>
+                    <div style="flex:1;"></div>
+                    <button onclick="deleteCategory('${parent.id}')" class="btn btn-small" style="background: #fff; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
+                </div>
+            `;
+            groupDiv.appendChild(parentDiv);
+
+            // Children Items
             const children = categories.filter(c => c.parentId == parent.id);
             children.forEach(child => {
                 const childDiv = document.createElement('div');
                 childDiv.className = 'cat-list-item sub-cat-item';
+                childDiv.style.borderTop = '1px solid #eee';
+                childDiv.style.borderBottom = 'none';
+                childDiv.style.borderLeft = '3px solid #d63031';
+                childDiv.style.borderRight = 'none';
+                childDiv.style.marginBottom = '0';
                 childDiv.innerHTML = `
                     <span>${child.name}</span>
                     <button onclick="deleteCategory('${child.id}')" class="btn btn-small" style="background: #fff; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Sil</button>
                 `;
-                categoryListContainer.appendChild(childDiv);
+                groupDiv.appendChild(childDiv);
             });
+
+            categoryListContainer.appendChild(groupDiv);
         });
+
+        // Initialize Sortable
+        new Sortable(categoryListContainer, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function () {
+                const saveBtn = document.getElementById('saveCategoryOrderBtn');
+                if (saveBtn) saveBtn.classList.remove('hidden');
+            }
+        });
+
     } catch (error) {
         console.error("Error loading categories:", error);
     }
 }
+
+// --- Category Reordering Logic ---
+// Remove old manual handlers - unnecessary now with SortableJS
+function handleCatDragStart(e) { }
+function handleCatDragOver(e) { }
+function handleCatDragEnter(e) { }
+function handleCatDragLeave(e) { }
+function handleCatDrop(e) { }
+function handleCatDragEnd(e) { }
+
+
+window.saveCategoryOrder = async () => {
+    const container = document.getElementById('categoryListContainer');
+    const items = container.querySelectorAll('.cat-group');
+    const btn = document.getElementById('saveCategoryOrderBtn');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+    }
+
+    const batch = db.batch();
+
+    items.forEach((item, index) => {
+        const id = item.getAttribute('data-id');
+        const ref = db.collection('categories').doc(id);
+        batch.update(ref, { order: index });
+    });
+
+    try {
+        await batch.commit();
+        alert('Kategori sıralaması güncellendi! Anasayfada bu sırayla görünecekler.');
+        if (btn) btn.classList.add('hidden');
+    } catch (error) {
+        console.error("Error saving order:", error);
+        alert('Sıralama kaydedilemedi: ' + error.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> Sıralamayı Kaydet';
+        }
+    }
+}
+
+
+
 
 window.loadAnnouncements = async function () {
     const announcementListContainer = document.getElementById('announcementListContainer');
@@ -402,8 +469,9 @@ window.loadSiteSettings = async function () {
             if (document.getElementById('topAnnouncement'))
                 document.getElementById('topAnnouncement').value = data.announcementText || '';
 
-            if (document.getElementById('showAnnouncement'))
-                document.getElementById('showAnnouncement').checked = data.showAnnouncement || false;
+            // showAnnouncement checkbox removed
+            // if (document.getElementById('showAnnouncement'))
+            //    document.getElementById('showAnnouncement').checked = data.showAnnouncement || false;
         }
     } catch (e) {
         console.error("Error loading settings:", e);
@@ -703,6 +771,26 @@ document.addEventListener('DOMContentLoaded', () => {
     */
 
     // --- Auth Logic ---
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in.
+            console.log("User is logged in:", user.email);
+            showAdminPanel();
+        } else {
+            // No user is signed in.
+            console.log("No user logged in.");
+            loginSection.classList.remove('hidden');
+            adminPanel.classList.add('hidden');
+
+            // Check if URL has ?logout=true
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('logout') === 'true') {
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    });
+
     const showAdminPanel = () => {
         loginSection.classList.add('hidden');
         adminPanel.classList.remove('hidden');
@@ -712,55 +800,43 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSliderImages();
     }
 
-    if (localStorage.getItem('adminLoggedIn') === 'true') {
-        showAdminPanel();
-    }
-
-    // Init Credentials on Load
-    initAdminCredentials();
-
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
         const btn = loginForm.querySelector('button');
 
         btn.disabled = true;
-        btn.innerText = 'Kontrol ediliyor...';
+        btn.innerText = 'Giriş Yapılıyor...';
 
         try {
-            const doc = await db.collection('settings').doc('admin').get();
-            if (!doc.exists) {
-                await initAdminCredentials();
-                alert('Sistem güncellendi, lütfen tekrar deneyin.');
-                btn.disabled = false;
-                btn.innerText = 'Giriş Yap';
-                return;
-            }
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+            // onAuthStateChanged will handle the UI update
+            loginForm.reset();
+        } catch (error) {
+            console.error("Login Error:", error);
+            let msg = 'Giriş yapılamadı: ' + error.message; // Default shows full message
 
-            const data = doc.data();
-            const hash = await sha256(p);
+            if (error.code === 'auth/user-not-found') msg = 'HATA: Böyle bir kullanıcı sistemde yok.';
+            if (error.code === 'auth/wrong-password') msg = 'HATA: Şifre yanlış.';
+            if (error.code === 'auth/invalid-email') msg = 'HATA: Geçersiz e-posta adresi yapılandırması.';
+            if (error.code === 'auth/configuration-not-found') msg = 'HATA: Firebase E-posta/Şifre girişi aktif değil. Lütfen Firebase konsolundan Authentication kısmını etkinleştirin.';
+            if (error.code === 'auth/operation-not-allowed') msg = 'HATA: E-posta/Şifre girişi Firebase konsolunda kapalı.';
+            if (error.code === 'auth/too-many-requests') msg = 'HATA: Çok fazla başarısız deneme. Lütfen biraz bekleyin.';
 
-            if (u === data.username && hash === data.passwordHash) {
-                localStorage.setItem('adminLoggedIn', 'true');
-                showAdminPanel();
-                loginForm.reset();
-            } else {
-                alert('Hatalı kullanıcı adı veya şifre!');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Giriş yapılamadı: ' + err.message);
-        } finally {
+            alert(msg);
             btn.disabled = false;
             btn.innerText = 'Giriş Yap';
         }
     });
 
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('adminLoggedIn');
-        loginSection.classList.remove('hidden');
-        adminPanel.classList.add('hidden');
+        firebase.auth().signOut().then(() => {
+            console.log('Signed Out');
+            // onAuthStateChanged will handle the UI update
+        }).catch((error) => {
+            console.error('Sign Out Error', error);
+        });
     });
 
     // --- Product Form Listener ---
@@ -902,7 +978,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (changePasswordForm) {
         changePasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const currentP = document.getElementById('currentPassword').value;
             const newP = document.getElementById('newPassword').value;
             const confirmP = document.getElementById('confirmPassword').value;
 
@@ -911,27 +986,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            try {
-                const doc = await db.collection('settings').doc('admin').get();
-                if (!doc.exists) return;
+            if (newP.length < 6) {
+                alert('Şifre en az 6 karakter olmalıdır.');
+                return;
+            }
 
-                const data = doc.data();
-                const currentHash = await sha256(currentP);
-
-                if (currentHash !== data.passwordHash) {
-                    alert('Mevcut şifre yanlış!');
-                    return;
+            const user = firebase.auth().currentUser;
+            if (user) {
+                try {
+                    await user.updatePassword(newP);
+                    alert('Şifre başarıyla güncellendi! Lütfen yeni şifreyle tekrar giriş yapın.');
+                    changePasswordForm.reset();
+                    // Optionally sign out to force re-login
+                    // firebase.auth().signOut();
+                } catch (error) {
+                    console.error("Password Update Error:", error);
+                    alert('Hata: ' + error.message);
+                    // Re-authentication might be needed if session is old
+                    if (error.code === 'auth/requires-recent-login') {
+                        alert('Güvenlik gereği bu işlem için yeniden giriş yapmanız gerekiyor.');
+                        firebase.auth().signOut();
+                    }
                 }
-
-                const newHash = await sha256(newP);
-                await db.collection('settings').doc('admin').update({
-                    passwordHash: newHash
-                });
-
-                alert('Şifre başarıyla güncellendi!');
-                changePasswordForm.reset();
-            } catch (err) {
-                alert('Hata: ' + err.message);
+            } else {
+                alert('Oturum açık değil.');
             }
         });
     }
@@ -944,14 +1022,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const themeColor = document.getElementById('themeColor').value;
             const footerColor = document.getElementById('footerColor').value;
             const text = document.getElementById('topAnnouncement').value;
-            const show = document.getElementById('showAnnouncement').checked;
+            // const show = document.getElementById('showAnnouncement').checked; // Removed
 
             try {
                 await db.collection('settings').doc('general').set({
                     themeColor: themeColor,
                     footerColor: footerColor,
                     announcementText: text,
-                    showAnnouncement: show
+                    showAnnouncement: true // Always show if text exists
                 }, { merge: true });
                 alert('Site ayarları güncellendi!');
             } catch (e) {
